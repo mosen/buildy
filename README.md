@@ -192,7 +192,7 @@ Asynchronous API Ideas
 * asynchronous tasks prefixed with 'a'
 * could have a few different calling structures
 
-1. Object literal of handlers
+Object literal of handlers
 -----------------------------
 
 ```javascript
@@ -207,7 +207,7 @@ buildy.aMinify({
     });
 ```
 
-2. Return EventEmitter, Subscribe to complete
+Return EventEmitter, Subscribe to complete
 ---------------------------------------------
 
 ```javascript
@@ -216,7 +216,7 @@ buildy.aMinify().on('complete', function(buildy) {
 });
 ```
 
-3. Syntactical sugar for .on('complete', fn)
+Syntactical sugar for .on('complete', fn)
 --------------------------------------------
 
 ```javascript
@@ -225,7 +225,7 @@ buildy.aMinify().then(function(buildy) {
 });
 ```
 
-4. Chain combinations via variable assignment
+Chain combinations via variable assignment
 ---------------------------------------------
 
 ```javascript
@@ -236,7 +236,7 @@ var concatMinifyTask = function(buildy) {
 buildy.jslint().then(concatMinifyTask);
 ```
 
-5. Chain combinations by define method
+Chain combinations by define method
 --------------------------------------
 
 ```javascript
