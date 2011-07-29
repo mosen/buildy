@@ -90,7 +90,7 @@ exports.lint = function(o, lintopts, callback) {
 
     if (o.source && o.source.length > 0) {
         result = linter.lint(o.source, opts);
-        callback();
+        callback(result);
     } else if (o.sourceFile && o.sourceFile.length > 0) {
         fs.readFile(o.sourceFile, 'utf8', function(err, data) {
            
@@ -102,7 +102,7 @@ exports.lint = function(o, lintopts, callback) {
           
            result = linter.lint(data, opts);
            reporter.report(o.sourceFile, result);
-           callback();
+           callback(result);
         });
     } else {
         callback();

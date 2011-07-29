@@ -247,3 +247,39 @@ buildy.define('lint and minify', function(buildy) {
 
 buildy.files('test.js').run('lint and minify')
 ```
+
+Batch via instruction stack
+---------------------------
+
+```javascript
+
+buildy.batch([
+    { 'minify' : [args] },
+    { 'jslint' : { args: [args], tasks: [
+    ] }
+]);
+
+after() as a global fn? handles an event and then returns the buildy object to
+continue the chain.
+
+buildy.batch([
+    { after('minify')
+]);
+
+buildy.aMinify('minify')
+after('minify').copy('destination.js');
+
+
+```
+
+Chains are synchronous and are broken by asynchronous operations
+----------------------------------------------------------------
+
+```javascript
+
+buildy.concat().aMinify('minifiedfiles');
+
+after('minifiedfiles').write('file-min.js');
+
+
+```
