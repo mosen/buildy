@@ -120,6 +120,15 @@ this feature is planned.
 
 ***
 
+`invoke(function(input){})`
+
+* inputs: anything
+* outputs: nothing
+
+Take the output of the previous task and give it to your own anonymous function.
+
+***
+
 `jslint(lintOptions)`
 
 * inputs: file | string
@@ -176,3 +185,65 @@ this will be configurable in the near future.
 
 Write the output of the previous task to the specified filename, the output
 is the filename of the written file which can be chained to further tasks.
+
+Asynchronous API Ideas
+======================
+
+* asynchronous tasks prefixed with 'a'
+* could have a few different calling structures
+
+1. Object literal of handlers
+-----------------------------
+
+```javascript
+buildy.aMinify({
+    'complete' : function(buildy) {
+        // continue chain
+    },
+    'failed' : function(buildy) {
+        buildy.log();
+        console.error();
+        // chain has ended
+    });
+```
+
+2. Return EventEmitter, Subscribe to complete
+---------------------------------------------
+
+```javascript
+buildy.aMinify().on('complete', function(buildy) {
+    // continue chain
+});
+```
+
+3. Syntactical sugar for .on('complete', fn)
+--------------------------------------------
+
+```javascript
+buildy.aMinify().then(function(buildy) {
+
+});
+```
+
+4. Chain combinations via variable assignment
+---------------------------------------------
+
+```javascript
+var concatMinifyTask = function(buildy) {
+    buildy.concat().minify().write('min.js');
+};
+
+buildy.jslint().then(concatMinifyTask);
+```
+
+5. Chain combinations by define method
+--------------------------------------
+
+```javascript
+
+buildy.define('lint and minify', function(buildy) {
+    return buildy.jslint().minify();
+});
+
+buildy.files('test.js').run('lint and minify')
+```

@@ -16,3 +16,25 @@ buildy.files(['./js/test1.js', './js/test2.js']).concat().fork([
        callback();
    }
 ]);
+
+buildy.aMinify({
+   'complete' : function(b) {
+       b.doSomething
+   },
+   'fail' : function(b) {
+       
+   }
+});
+
+buildy.aMinify({ 'complete' : ['jslint', 'arg1', 'arg2'] })
+
+buildy.aMinify.on('complete', function(b) {
+   
+});
+
+var taskB = function(input) {
+    input.a
+}
+
+// sugar:
+buildy.aMinify().then(taskB)
