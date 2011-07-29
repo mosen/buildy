@@ -146,7 +146,10 @@ Minify the input string using Less.
 
 ***
 
-*(string)* -> **.template(template, model)** -> *(string)*
+**.template(template, model)**
+
+* inputs: file | string
+* outputs: string
 
 Apply the input to a mustache template, with additional variables specified in *model*.
 At the moment the input of the task is assigned to the template variable 'code' although
@@ -154,7 +157,10 @@ this will be configurable in the near future.
 
 ***
 
-*(string|strings|files)* -> **.log()** -> *(string|strings|files)*
+**.log()**
+
+* inputs: string | strings | files
+* outputs: same result as the input, does not modify
 
 Log the output of the previous task to the console, to inspect its current state.
 
