@@ -114,6 +114,19 @@ Buildy.prototype = {
     },
     
     /**
+     * Execute a supplied anonymous function
+     * 
+     * Allows the developer to insert custom logic into the build process.
+     * The anonymous function receives the output of the previous task as
+     * the only parameter.
+     * 
+     * @param aFn {Function} The anonymous function to execute.
+     */
+    invoke : function(aFn) {
+        aFn(this);
+    },
+    
+    /**
      * JSLint the input
      * 
      * This task can be performed on a string, or strings or files

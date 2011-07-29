@@ -67,6 +67,43 @@ Task Reference
 
 The built in tasks are as follows:
 
+`concat()`
+
+* inputs: files | strings
+* outputs: string
+
+Take the output of the previous task and concatenate it.
+
+***
+
+`csslint(lintOptions)`
+
+* inputs: file | string
+* outputs: same result as the input, does not modify
+
+Run CSSLint on the output of the previous task
+
+***
+
+`cssminify(options)`
+
+* inputs: file | string
+* outputs: string
+
+Minify the input string using Less.
+
+***
+
+`files(string|array of strings)`
+
+* inputs: nothing
+* outputs: files
+
+Generate a list of filenames which will act as the input for the next task in the chain.
+At the moment (in alpha stage) this does not support globbing.
+
+***
+
 `fork([functions])`
 
 * inputs: anything
@@ -83,25 +120,6 @@ this feature is planned.
 
 ***
 
-`files(string|array of strings)`
-
-* inputs: nothing
-* outputs: files
-
-Generate a list of filenames which will act as the input for the next task in the chain.
-At the moment (in alpha stage) this does not support globbing.
-
-***
-
-`concat()`
-
-* inputs: files | strings
-* outputs: string
-
-Take the output of the previous task and concatenate it.
-
-***
-
 `jslint(lintOptions)`
 
 * inputs: file | string
@@ -113,31 +131,12 @@ is passed to JSLint as the lint options.
 
 ***
 
-`csslint(lintOptions)`
+`log()`
 
-* inputs: file | string
+* inputs: string | strings | files
 * outputs: same result as the input, does not modify
 
-Run CSSLint on the output of the previous task
-
-***
-
-`write(filename)`
-
-* inputs: string
-* outputs: file
-
-Write the output of the previous task to the specified filename, the output
-is the filename of the written file which can be chained to further tasks.
-
-***
-
-`replace(regex, replace, flags)`
-
-* inputs: string
-* outputs: string
-
-Apply a regular expression to replace strings from the input.
+Log the output of the previous task to the console, to inspect its current state.
 
 ***
 
@@ -150,12 +149,12 @@ Minify the input string using uglify-js.
 
 ***
 
-`cssminify(options)`
+`replace(regex, replace, flags)`
 
-* inputs: file | string
+* inputs: string
 * outputs: string
 
-Minify the input string using Less.
+Apply a regular expression to replace strings from the input.
 
 ***
 
@@ -170,13 +169,10 @@ this will be configurable in the near future.
 
 ***
 
-`log()`
+`write(filename)`
 
-* inputs: string | strings | files
-* outputs: same result as the input, does not modify
+* inputs: string
+* outputs: file
 
-Log the output of the previous task to the console, to inspect its current state.
-
-
-
-
+Write the output of the previous task to the specified filename, the output
+is the filename of the written file which can be chained to further tasks.
