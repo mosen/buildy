@@ -1,20 +1,30 @@
-What?!
-======
-
-buildy is a node.js based build system.
-
-ITS STILL IN DEVELOPMENT ALPHA STAGE
-
-Why?!
+What?
 =====
 
-because other build systems assume sequential, synchronous tasks. or make it really hard to do asynchronous build tasks.
-I love the idea of event driven I/O, so why not apply that to a build system.
+buildy aims to be an asynchronous build system for node.js
+
+*It's really really young right now, in its alpha stage*
+
+Why?
+====
+
+Because the core philosophy of node.js is asynchronous operation. But I think
+the author of vows, a BDD testing framework, put it better in their main blurb:
+
+> The first, and obvious reason is that node.js is asynchronous, and therefore our tests should be. 
+> The second reason is to make tests which target I/O run much faster, by running them concurrently. 
+
+Pretty ironically quite a few buildy tasks run synchronously at the moment, but 
+the idea is to move to asynchronous/event driven operation. The first priority
+was ease of use, or - how can you get a lot of value without writing much code.
 
 Examples
 ========
 
-buildy supports a chaining syntax which is pretty similar to jQuery, even though I've never used jQuery.
+buildy supports a chaining syntax which is pretty similar looking to jQuery.
+
+Example 1. Compress all the things
+----------------------------------
 
 This is the most generic scenario I can think of: you have your code in multiple files, and you want to 
 join them together, minify them, and then write the result out to another file that you serve up.
@@ -26,7 +36,10 @@ var Buildy = require('buildy').Buildy,
 buildy.files('*.js').concat().minify().write('javascript.js');
 ```
 
-Wait a second, thats all sequential.. what if you need to do a lot of things in one go...
+Example 2. When all you need is a fork
+--------------------------------------
+
+Wait a second, thats all sequential.. what if you need to do a lot of things in parallel...
 
 ```javascript
 var Buildy = require('buildy').Buildy,
@@ -54,7 +67,7 @@ Task Reference
 
 The built in tasks are as follows:
 
-**.fork([functions])**
+`fork([functions])`
 
 * inputs: anything
 * outputs: nothing
@@ -70,7 +83,7 @@ this feature is planned.
 
 ***
 
-**.files(string|array of strings)**
+`files(string|array of strings)`
 
 * inputs: nothing
 * outputs: files
@@ -80,7 +93,7 @@ At the moment (in alpha stage) this does not support globbing.
 
 ***
 
-**.concat()**
+`concat()`
 
 * inputs: files | strings
 * outputs: string
@@ -89,7 +102,7 @@ Take the output of the previous task and concatenate it.
 
 ***
 
-**.jslint(lintOptions)**
+`jslint(lintOptions)`
 
 * inputs: file | string
 * outputs: same result as the input, does not modify
@@ -100,7 +113,7 @@ is passed to JSLint as the lint options.
 
 ***
 
-**.csslint(lintOptions)**
+`csslint(lintOptions)`
 
 * inputs: file | string
 * outputs: same result as the input, does not modify
@@ -109,7 +122,7 @@ Run CSSLint on the output of the previous task
 
 ***
 
-**.write(filename)**
+`write(filename)`
 
 * inputs: string
 * outputs: file
@@ -119,7 +132,7 @@ is the filename of the written file which can be chained to further tasks.
 
 ***
 
-**.replace(regex, replace, flags)**
+`replace(regex, replace, flags)`
 
 * inputs: string
 * outputs: string
@@ -128,7 +141,7 @@ Apply a regular expression to replace strings from the input.
 
 ***
 
-**.minify(options)**
+`minify(options)`
 
 * inputs: file | string
 * outputs: string
@@ -137,7 +150,7 @@ Minify the input string using uglify-js.
 
 ***
 
-**.cssminify(options)**
+`cssminify(options)`
 
 * inputs: file | string
 * outputs: string
@@ -146,7 +159,7 @@ Minify the input string using Less.
 
 ***
 
-**.template(template, model)**
+`template(template, model)`
 
 * inputs: file | string
 * outputs: string
@@ -157,7 +170,7 @@ this will be configurable in the near future.
 
 ***
 
-**.log()**
+`log()`
 
 * inputs: string | strings | files
 * outputs: same result as the input, does not modify
