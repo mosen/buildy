@@ -48,3 +48,89 @@ buildy.files('*.js').concat().fork([
 ```
 
 And now you have 2 files, one concatenated for debugging, and one minified version, and jslint output from your original source.
+
+Task Reference
+==============
+
+The built in tasks are as follows:
+
+*(any)* -> *.fork([functions])* -> *(nothing)*
+
+Take the output of the previous task, and split into a number of tasks running
+parallel. 
+
+The fork function takes an array of functions which receive two parameters:
+a reference to the previous buildy task and a callback function to let fork know that
+the task has completed. If the fork task is the last one in a chain, you don't need to
+deal with the callback. At the moment you cannot chain at the end of a fork task but
+this feature is planned.
+
+***
+
+*(nothing)* -> **.files(string|array of strings)** -> *(files)*
+
+Generate a list of filenames which will act as the input for the next task in the chain.
+At the moment (in alpha stage) this does not support globbing.
+
+***
+
+*(files|strings)* -> **.concat()** -> *(string)*
+
+Take the output of the previous task and concatenate it.
+
+***
+
+*(string)* -> **.jslint(lintOptions)** -> *(input)*
+
+Run JSLint on the output of the previous task, the output of this task
+is a repeat of what was fed into it. It takes one object parameter which
+is passed to JSLint as the lint options.
+
+***
+
+*(string)* -> **.csslint(lintOptions)** -> *(input)*
+
+Run CSSLint on the output of the previous task
+
+***
+
+*(string)* -> **.write(filename)** -> *(file)*
+
+Write the output of the previous task to the specified filename, the output
+is the filename of the written file which can be chained to further tasks.
+
+***
+
+*(string)* -> **.replace(regex, replace, flags)** -> *(string)*
+
+Apply a regular expression to replace strings from the input.
+
+***
+
+*(string)* -> **.minify(options)** -> *(string)*
+
+Minify the input string using uglify-js.
+
+***
+
+*(string)* -> **.cssminify(options)** -> *(string)*
+
+Minify the input string using Less.
+
+***
+
+*(string)* -> **.template(template, model)** -> *(string)*
+
+Apply the input to a mustache template, with additional variables specified in *model*.
+At the moment the input of the task is assigned to the template variable 'code' although
+this will be configurable in the near future.
+
+***
+
+*(string|strings|files)* -> **.log()** -> *(string|strings|files)*
+
+Log the output of the previous task to the console, to inspect its current state.
+
+
+
+
