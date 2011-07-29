@@ -5,6 +5,7 @@
  * TODO: metric tons of error handling
  */
 var fs = require('fs'),
+    glob = require('glob'),
     ju = require('./utils');
 
 

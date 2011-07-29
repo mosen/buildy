@@ -54,7 +54,10 @@ Task Reference
 
 The built in tasks are as follows:
 
-*(any)* -> *.fork([functions])* -> *(nothing)*
+**.fork([functions])**
+
+* inputs: anything
+* outputs: nothing
 
 Take the output of the previous task, and split into a number of tasks running
 parallel. 
@@ -67,20 +70,29 @@ this feature is planned.
 
 ***
 
-*(nothing)* -> **.files(string|array of strings)** -> *(files)*
+**.files(string|array of strings)**
+
+* inputs: nothing
+* outputs: files
 
 Generate a list of filenames which will act as the input for the next task in the chain.
 At the moment (in alpha stage) this does not support globbing.
 
 ***
 
-*(files|strings)* -> **.concat()** -> *(string)*
+**.concat()**
+
+* inputs: files | strings
+* outputs: string
 
 Take the output of the previous task and concatenate it.
 
 ***
 
-*(string)* -> **.jslint(lintOptions)** -> *(input)*
+**.jslint(lintOptions)**
+
+* inputs: file | string
+* outputs: same result as the input, does not modify
 
 Run JSLint on the output of the previous task, the output of this task
 is a repeat of what was fed into it. It takes one object parameter which
@@ -88,32 +100,47 @@ is passed to JSLint as the lint options.
 
 ***
 
-*(string)* -> **.csslint(lintOptions)** -> *(input)*
+**.csslint(lintOptions)**
+
+* inputs: file | string
+* outputs: same result as the input, does not modify
 
 Run CSSLint on the output of the previous task
 
 ***
 
-*(string)* -> **.write(filename)** -> *(file)*
+**.write(filename)**
+
+* inputs: string
+* outputs: file
 
 Write the output of the previous task to the specified filename, the output
 is the filename of the written file which can be chained to further tasks.
 
 ***
 
-*(string)* -> **.replace(regex, replace, flags)** -> *(string)*
+**.replace(regex, replace, flags)**
+
+* inputs: string
+* outputs: string
 
 Apply a regular expression to replace strings from the input.
 
 ***
 
-*(string)* -> **.minify(options)** -> *(string)*
+**.minify(options)**
+
+* inputs: file | string
+* outputs: string
 
 Minify the input string using uglify-js.
 
 ***
 
-*(string)* -> **.cssminify(options)** -> *(string)*
+**.cssminify(options)**
+
+* inputs: file | string
+* outputs: string
 
 Minify the input string using Less.
 
