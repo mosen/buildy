@@ -1,3 +1,4 @@
 /buildy/node_modules/.bin/
 /buildy/node_modules/jslint/node_modules/.bin/
 /buildy/node_modules/
+/buildy/examples/build/

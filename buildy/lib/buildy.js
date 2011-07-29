@@ -4,7 +4,8 @@
  * 
  * TODO: metric tons of error handling
  */
-var fs = require('fs'),
+var util = require('util'),
+    fs = require('fs'),
     events = require('events'),
     glob = require('glob'),
     ju = require('./utils');
@@ -194,7 +195,7 @@ Buildy.prototype = {
                 break;
             
             case Buildy.TYPES.STRING:
-                ju.lint({ source: this._input }, lintOptions, function() {
+                ju.lint({ source: this._input }, lintOptions, function(result) {
                     var reporter = require('jslint/lib/reporter.js');
                     reporter.report('buildy', result);
 
