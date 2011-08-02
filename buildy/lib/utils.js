@@ -65,16 +65,6 @@ exports.applyTemplateSync = function(dest, template, o, format) {
 }
 
 /**
- * This function wraps a regex replacement and takes care of file operations related
- * to that replacement. If you just want regex, use the native api.
- * 
- * 
- */
-exports.regexReplaceSync = function(dest, source, regexstring, replace) {
-    
-}
-
-/**
  * Run JSLint|JSHint on a string or file.
  * 
  * @param o {Object} Object containing properties .source | .sourceFile, string or file to lint respectively.
@@ -141,6 +131,57 @@ exports.minifySync = function(o) {
         } else {
             fs.writeFileSync(o.destFile, pro.gen_code(ast), 'utf8');
         }
+    }
+}
+
+/**
+ * Minify the input
+ * 
+ * @param o {Object} Minify parameters:
+ *  o.source - source code as string
+ *  o.sourceFile - source filename
+ *  o.destFile - destination file to be written, otherwise the first argument to the complete
+ *  event will be the output string.
+ * @param callback {Function} Callback when done
+ */
+exports.minify = function(o, callback) {
+    
+    var min = function(o, callback) {
+
+        var jsp = require("uglify-js").parser,
+            pro = require("uglify-js").uglify,
+            ast;
+
+        try {
+            ast = jsp.parse(o.source); // parse into syntax tree
+            ast = pro.ast_mangle(ast);
+            ast = pro.ast_squeeze(ast);
+        } catch (e) {
+            console.log(e.stack);
+            throw Error('The minify task failed, most likely the source file was unparseable. Please check your syntax. Error: ' + e.message);
+        }
+
+        if (!o.destFile) {
+            callback(false, pro.gen_code(ast));
+        } else {
+            fs.writeFile(o.destFile, pro.gen_code(ast), 'utf8', function(err) {
+                if (err) throw err;
+                callback(false, o.destFile);
+            });
+        }
+    };
+    
+    if (o.sourceFile) {
+        fs.readFile(o.sourceFile, 'utf8', function(err, data) {
+            if (err) throw err;
+            delete o.sourceFile;
+            o.source = data;
+            min(o, callback);
+        });
+    } else if (o.source) {
+        min(o, callback);
+    } else {
+        callback(true);
     }
 }
 
