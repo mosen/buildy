@@ -20,6 +20,14 @@ Queue.prototype = {
     _name : 'queue',
     
     /**
+     * Stack of calling queues
+     * 
+     * @property _nameStack
+     * @default empty array
+     */
+    _nameStack : [],
+    
+    /**
      * Queued tasks
      * 
      * @property _queue
@@ -90,13 +98,11 @@ Queue.prototype = {
     },
     
     _onTaskComplete : function(result) {
-        console.log('next task for queue: ' + this._name);
-        
         this._queuePosition++;
         if (this._queuePosition < this._queue.length) {
             this.run(this._runner);
         } else {
-            console.log('done');
+            console.log('Queue complete: ' + this._name);
         }
     },
     

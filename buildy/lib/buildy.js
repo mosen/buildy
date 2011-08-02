@@ -84,7 +84,6 @@ Buildy.prototype = {
         promise.emit('complete');
     },
     
-    
     fork : function(forkspec, promise) {
         var child,
             childQueue,
@@ -93,6 +92,7 @@ Buildy.prototype = {
         for (forkName in forkspec) {
            childQueue = new Queue(forkName);
            childQueue._queue = [];
+           childQueue._nameStack.push(this._name);
            child = Buildy.factory(this._type, this._state.slice());
            forkspec[forkName].call(childQueue, child);            
         }

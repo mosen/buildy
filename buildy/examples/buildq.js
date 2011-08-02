@@ -1,12 +1,11 @@
 // This is an example build file for buildy which showcases a few of its built in features.
 var Queue = require('buildy/lib/queue').Queue,
-    q = new Queue('build my stuff'),
     Buildy = require('buildy').Buildy,
     b = new Buildy();
     
     
-// build queue
-q.task('files', ['./js/test1.js', './js/test2.js']) // all of these synchronous
+// build a javascript component
+new Queue('build my component').task('files', ['./js/test1.js', './js/test2.js']) // all of these synchronous
     .task('concat')
     .task('jslint')
     .task('fork', {
@@ -31,4 +30,17 @@ q.task('files', ['./js/test1.js', './js/test2.js']) // all of these synchronous
     })
     .run(b);
 
-
+var nq = new Queue('build my skins');
+nq._queue = [];
+// build a skin component
+nq.task('files', ['./css/test1.css', './css/test2.css'])
+    .task('concat')
+    .task('csslint')
+    .task('fork', {
+        'raw css version' : function(b) {
+            this.task('write', { name: './build/test.css' }).run(b);
+        },
+        'minified css version' : function(b) {
+            this.task('cssminify').task('write', { name: './build/test-min.css' }).run(b);
+        }
+    }).run(new Buildy());
