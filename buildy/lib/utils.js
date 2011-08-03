@@ -18,14 +18,18 @@ exports.concatSync = function(dest, sourcefiles, format) {
         content = '',
         format = format || 'utf8';
     
-    for (; i < sourcefiles.length; i++) {
-        content += fs.readFileSync(sourcefiles[i], format) || '';
-    }
-    
-    if (dest === null) {
-        return content;
-    } else {
-        fs.writeFileSync(dest, content, format);
+    try { 
+        for (; i < sourcefiles.length; i++) {
+            content += fs.readFileSync(sourcefiles[i], format) || '';
+        }
+
+        if (dest === null) {
+            return content;
+        } else {
+            fs.writeFileSync(dest, content, format);
+        }
+    } catch(e) {
+        throw new Error('Could not read or write the files to be concatenated.');
     }
 }
 
@@ -61,7 +65,7 @@ exports.applyTemplateSync = function(dest, template, o, format) {
  * .model (Object)
  * @param callback {Function}
  */
-exports.applyTemplate = function(o, callback) {
+exports.applyTemplate = function applyTemplate(o, callback) {
     var Mustache = require('Mustache'),
         format = 'utf8',
         fnGotTemplate = function(templateString) {
@@ -73,6 +77,10 @@ exports.applyTemplate = function(o, callback) {
             templatedString = Mustache.to_html(templateString, o.model);
             callback(templatedString);
         };
+    
+    if (o === undefined) {
+        throw new TypeError('applyTemplate configuration object was not supplied');
+    }
     
     if (o.hasOwnProperty('templateFile')) {
         fs.readFile(o.templateFile, format, function(err, data) {
@@ -409,10 +417,8 @@ var Copy = function copy(src, dst, callback) {
 
 sys.inherits(Copy, events.EventEmitter);
    
-exports.copy = function(src, dst, callback) {
-
+exports.copyAsync = function(src, dst, callback) {
   return new Copy(src, dst, callback);
-  
 };
 
 exports.copySync = function copySync(src, dst) {
