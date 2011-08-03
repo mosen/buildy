@@ -1,11 +1,3 @@
-/**
- * An attempt to create an alternative to Jake using only evented IO and event
- * dependant tasks.
- * 
- * q('files', [files])('concat')('minify')('write', 'output.js').run()
- * 
- * TODO: metric tons of error handling
- */
 var util = require('util'),
     fs = require('fs'),
     events = require('events'),
@@ -15,16 +7,15 @@ var util = require('util'),
 
 /**
  * @class Buildy
+ * @param input {Object} Initial state
  * @constructor
  */
 function Buildy(input) {
     this._state = input;
 }
 
-//util.inherits(Buildy, events.EventEmitter);
-
 /**
- * Static types of Buildy objects that may exist
+ * Constants of Buildy input/output types that may exist
  */
 Buildy.TYPES = {
     FILES : 'FILES', // Collection of file paths, this is always an array, even with one filename
@@ -33,14 +24,12 @@ Buildy.TYPES = {
 };
 
 /**
- * A convenience method for producing buildy task objects.
- * 
- * Removes the need to access private members on the buildy task as well
- * as provide a point for injection of configuration information.
+ * A convenience method for producing buildy objects.
  * 
  * @param type {String} Buildy input type (one of Buildy.TYPES)
  * @param input {Object} The data which acts as the input for the next task in the chain
  * @return {Buildy} Instance of a buildy task
+ * @public
  */
 Buildy.factory = function(type, input) {
     var output = new Buildy(input);
@@ -52,7 +41,8 @@ Buildy.factory = function(type, input) {
 Buildy.prototype = {
     
     /**
-     * Input given to the current build task
+     * The current state information. Determined by the output of
+     * the previous task OR the constructor.
      * 
      * @property _state
      * @type {Object}
@@ -60,7 +50,7 @@ Buildy.prototype = {
     _state : null,
     
     /**
-     * Type of the current buildy input (one of Buildy.TYPES.*)
+     * The type of state that is currently held (one of Buildy.TYPES.*)
      * 
      * @property _type
      * @type {String}
@@ -68,22 +58,57 @@ Buildy.prototype = {
     _type : null,
     
     /**
-     * Generate a list of files
+     * Generate a list of files using a combination of names and globs
      * 
-     * This task behaves much like FileList in Jake which converts globs into
-     * a list of files. The list is returned as an array.
-     * 
-     * @param filespec {Array} Array of filenames, relative paths, and globs
-     * @return Array resolved filenames
+     * @method files
+     * @param filespec {Array} Array of literal filenames or globs
+     * @param promise {EventEmitter}
+     * @protected
      */
     files : function(filespec, promise) {
-        // TODO: node-glob globbing
-        this._type = Buildy.TYPES.FILES;
-        this._state = filespec;
+        var files = [],
+            self = this,
+            itemsToProcess = filespec.length,
+            globFlags = null,
+            fnAddFiles = function(filenames) {
+                files.push.apply(files, filenames);
+                itemsToProcess--;
+                
+                if (itemsToProcess == 0) {
+                    self._type = Buildy.TYPES.FILES;
+                    self._state = files;
+                    
+                    promise.emit('complete');
+                }
+            },
+            fnGlobResults = function(err, matches) {
+                if (err) {
+                    promise.emit('failed');
+                }
+                
+                fnAddFiles(matches);
+            };
         
-        promise.emit('complete');
+        filespec.forEach(function(f) {
+            
+            if (f.indexOf('?') > -1 || f.indexOf('*') > -1 || f.indexOf('[') > -1) {
+                glob.glob(f, globFlags, fnGlobResults);
+            } else {
+                fnAddFiles([f]);
+            }
+        });
     },
     
+    /**
+     * Fork the current Buildy and start a new Queue
+     * 
+     * Each function receives one parameter, the child Buildy object.
+     * Each function is also executed in the context of a new Queue object. so
+     * new tasks must begin with this.task('abc')
+     * 
+     * @param forkspec {Object} Hash of queue name : function
+     * @param promise {EventEmitter}
+     */
     fork : function(forkspec, promise) {
         var child,
             childQueue,
@@ -101,8 +126,11 @@ Buildy.prototype = {
     },
     
     /**
-     * Copy the input files to a destination using fs api
-     * This is normally synchronous
+     * Copy a file or multiple files to a destination.
+     * Can also be used to copy a file to a new file name.
+     * 
+     * TODO: async mode
+     * TODO: use promise
      * 
      * @param dest {String} The destination filename (if the source is a single file) or destination directory (no trailing slash)
      * @return {Object} Buildy.FILES containing paths to the files that have been copied
@@ -133,16 +161,20 @@ Buildy.prototype = {
                 break;
                 
             default:
-                throw new TypeError('copy can only be used with the file collection type');
+                promise.emit('failure');
         }
     },
 
     /**
-     * Concatenate the input files
+     * Concatenate the input
      * 
      * This task can be performed on files or strings
+     * 
+     * @param spec {Object} [Unused]
+     * @param promise {EventEmitter}
      */
     concat : function(spec, promise) {
+        
         switch (this._type) {
             case Buildy.TYPES.STRINGS:
                 this._state = this._state.join();
@@ -151,6 +183,8 @@ Buildy.prototype = {
                 break;
                 
             case Buildy.TYPES.FILES:
+                // Doesn't make sense to concatenate asynchronously, because we want
+                // to preserve the ordering
                 var concatString = ju.concatSync(null, this._state, 'utf8');
                 this._state = concatString;
                 this._type = Buildy.TYPES.STRING;
@@ -158,9 +192,7 @@ Buildy.prototype = {
                 break;
                 
             default:
-                // TODO: more detailed exceptions
-                throw new TypeError('concat does not support the input type');
-                return this;
+                promise.emit('failure');
                 break;
         }
     },
@@ -169,11 +201,12 @@ Buildy.prototype = {
      * JSLint the input
      * 
      * This task can be performed on a string, or strings or files
-     * This is a leaf task, there is no chaining.
+     * The task will return immediately and produces no output for the following
+     * task.
      * 
-     * @param spec {Object} options passed to lint
-     * @param promise {EventEmitter} emit complete when complete
-     * @return undefined
+     * @param spec {Object} jslint task configuration
+     * @param promise {EventEmitter}
+     * @protected
      */
     jslint : function(spec, promise) {
         var lintOptions = spec || {};
@@ -226,12 +259,14 @@ Buildy.prototype = {
     /**
      * CSSLint the input
      * 
-     * This can be executed on files, strings or string type Buildy tasks.
+     * This can be executed on files, strings or string.
      * 
-     * @param lintopts {Object} CSSLint options
+     * @param spec {Object} csslint task configuration
+     * @param promise {EventEmitter}
+     * @protected
      */
-    csslint : function(lintopts) {
-        var lintOptions = lintopts || {};
+    csslint : function(spec, promise) {
+        var lintOptions = spec || {};
         
         switch (this._type) {
             case Buildy.TYPES.FILES:
@@ -241,8 +276,7 @@ Buildy.prototype = {
                         console.log(result);
                     });
                 });
-                
-                return this;
+                promise.emit('complete');
                 break;
             
             case Buildy.TYPES.STRING:
@@ -250,8 +284,7 @@ Buildy.prototype = {
                     // TODO: user defined lint output
                     console.log(result);
                 });
-                
-                return this;
+                promise.emit('complete');              
                 break;
                 
             case Buildy.TYPES.STRINGS:
@@ -261,21 +294,19 @@ Buildy.prototype = {
                         console.log(result);
                     });
                 });
-                
-                return this;
+                promise.emit('complete');
                 break;
 
             default:
-                throw new TypeError('csslint does not support the input type');
-                return this;
+                promise.emit('failure');
                 break;  
         }
     },
     
     /**
-     * Write out the input to the destination filename
+     * Write out the input to the destination filename.
      * 
-     * TODO: fix inaccurate docblocks
+     * This can only apply to single string inputs.
      * 
      * @param spec {Object} options containing .name (filename)
      * @return {Object} Buildy.TYPES.FILES Buildy Task
@@ -291,9 +322,10 @@ Buildy.prototype = {
                     } else {
                         self._state = [spec.name];
                         self._type = Buildy.TYPES.FILES;
+                        
                         promise.emit('complete');
                     }
-                }); // TODO: consider async write?
+                });
                 break;
             
             default:
@@ -305,13 +337,13 @@ Buildy.prototype = {
     /**
      * Replace the content of the input by applying string.replace
      * 
-     * This should operate on strings and files
-     * TODO: files
+     * This operates on single or multiple strings.
      * 
-     * @param regex {String} Regular expression to match
-     * @param replace {String} Replacement string (Default '')
-     * @param flags {String} Regular expression flags
-     * @return {Object} Buildy.STRING | Buildy.STRINGS with expression replaced
+     * @todo replace file content using the file input
+     * @method replace
+     * @param spec {Object} Replace task config containing .regex .replace .flags
+     * @param promise {EventEmitter}
+     * @protected
      */
     replace : function(spec, promise) {
         var replace = spec.replace || '',
@@ -335,8 +367,7 @@ Buildy.prototype = {
                 this._state = outputStrings;
                 promise.emit('complete');
                 break;
-                
-            // TODO: support FILES type
+
             default:
                 promise.emit('failure');
                 break;
@@ -344,83 +375,35 @@ Buildy.prototype = {
     },
     
     /**
-     * Minify the content of the input using uglify-js
-     * 
-     * This should operate on string and files
-     * TODO: files
-     * TODO: use options
-     */
-    minifySync : function(spec, promise) {
-        var output, outputString;
-        
-        switch (this._type) {
-            case Buildy.TYPES.STRING:
-                outputString = ju.minifySync({source: this._state});
-                this._state = outputString;
-                promise.emit('complete');
-                break;
-                
-            case Buildy.TYPES.STRINGS:
-                var outputStrings = [];
-                this._state.forEach(function(s) {
-                    outputStrings.push(ju.minifySync({source: s}));
-                });
-                this._state = outputStrings;
-                promise.emit('complete');
-                break;
-            
-            case Buildy.TYPES.FILES:
-                // TODO: support multiple input files
-                if (this._state.length > 1) {
-                    promise.emit('failed');
-                    throw new TypeError('Buildy does not yet support multiple file minification');
-                }
-                
-                outputString = ju.minifySync({sourceFile: this._state[0]});
-                
-                this._state = outputString;
-                this._type = Buildy.TYPES.STRING;
-                promise.emit('complete');
-                break;
-                
-            default:
-                promise.emit('failed');
-                throw new TypeError('minify cannot be performed on this input');
-                break;
-        }
-        
-    },
-    
-    /**
-     * Asynchronously minify the input
+     * Minify the input (JavaScript)
      *
-     * @method aminify
-     * @param
-     * @returns
-     * @public
+     * @method minify
+     * @param spec {Object} Minify task configuration
+     * @param promise {EventEmitter}
+     * @protected
      */
     minify : function(spec, promise) {
         var self = this;
         
         switch (this._type) {
             case Buildy.TYPES.STRING:
-                ju.minify({source: this._state}, function(err, output) {
+                var fnMinifyCallback = function(err, output) {
                     if (err) {
                         promise.emit('failed');
                     } else {
                         self._state = output;
                         promise.emit('complete');
-                    }
-                });
+                    }                    
+                }
+                
+                ju.minify({source: this._state}, fnMinifyCallback);
                 break;
                 
             case Buildy.TYPES.STRINGS:
                 var stringCount = this._state.length,
                     stringDone = 0,
-                    outputStrings = [];
-                    
-                this._state.forEach(function(s) {
-                    ju.minify({source: s}, function(err, output) {
+                    outputStrings = [],
+                    fnMinifyCallback = function(err, output) {
                         if (err) {
                             console.log('cant minify');
                             promise.emit('failed');
@@ -433,8 +416,11 @@ Buildy.prototype = {
                                 self._state = outputStrings;
                                 promise.emit('complete');
                             }
-                        }
-                    });
+                        }                        
+                    };
+                    
+                this._state.forEach(function(s) {
+                    ju.minify({source: s}, fnMinifyCallback);
                 });
                 break;
             
@@ -458,72 +444,83 @@ Buildy.prototype = {
                 
             default:
                 promise.emit('failed');
-                throw new TypeError('minify cannot be performed on this input');
                 break;
         }
     },
     
     /**
-     * Minify the content of the input using Less
+     * Minify the input (CSS) using Less
      * 
-     * This should operate on string and files
-     * TODO: files
-     * TODO: basically everything in cssminify
+     * @todo support multiple strings
+     * @method cssminify
+     * @param spec {Object} CSS minify task configuration
+     * @param promise {EventEmitter}
+     * @protected
      */
-    cssminify : function(options) {
-        var output, outputString;
+    cssminify : function(spec, promise) {
+        var self = this;
         
         switch (this._type) {
             case Buildy.TYPES.STRING:
-                // TODO: minifySync
-                //outputString = ju.cssMinify({ source: this._state }, fnMinifyDone);
-                this._state = outputString;
-                return this;
+                var fnMinifyCallback = function(data) {
+                    self._state = data;
+                    promise.emit('complete');
+                };
+                
+                ju.cssMinify({ source: this._state }, fnMinifyCallback);
                 break;
         }
     },
     
     /**
-     * Apply a mustache template
+     * Apply a template using Mustache
      * 
      * At the moment the input automatically becomes a template variable called 'code'.
-     * TODO: This should be configurable to avoid a name clash
-     * 
-     * @param template {String} Filename of the template to apply
-     * @param model {Object} Model containing template variables
+     * @todo This should be configurable to avoid a name clash
+     * @todo support more than just string inputs
+     * @method template
+     * @param spec {Object} Template task configuration { template: 'stringtemplate', templateFile: 'template.mustache', model: modelObj }
+     * @param promise {EventEmitter}
+     * @protected
      */
-    template : function(template, model) {
+    template : function(spec, promise) {
+        var self = this,
+            fnTemplateCallback= function(data) {
+                self._state = data;
+                promise.emit('complete');
+            };
         
         switch (this._type) {
             case Buildy.TYPES.STRING:
-                var outputString;
-                model.code = this._state;
-                outputString = ju.applyTemplateSync(null, template, model);
-                this._state = outputString;
-                return this;
+                spec.model.code = this._state;
+                ju.applyTemplate(spec, fnTemplateCallback);
                 break;
                 
             //case Buildy.TYPES.FILES:
               
             default:
-                throw new TypeError('template cannot be performed on this input');
-                return this;
+                promise.emit('failure');
                 break;
         }
     },
     
     /**
-     * Log the output of the previous task to the console.
+     * Log the output of the previous task (the current state) to the console.
      * 
-     * @return {Buildy} The output of the previous task.
+     * @method log
+     * @param spec {Object} Unused
+     * @param promise {EventEmitter}
+     * @protected
      */
-    log : function() {
+    log : function(spec, promise) {
+        console.log('Buildy(' + this._type + ')');
         console.log(this._state);
-        return this;
+        promise.emit('complete');
     },
     
     /**
-     * Execute a task for the Buildy queue
+     * Execute a task using this Buildy.
+     * This method is normally invoked from the Queue object
      * 
      * @method exec
      * @param type {String} Type of task to execute

@@ -1,5 +1,5 @@
 /**
- * Utility functions called by the buildy build system.
+ * Utility functions called by the Buildy build system.
  */
 var sys = require('sys'),
     fs = require('fs'),
@@ -30,16 +30,6 @@ exports.concatSync = function(dest, sourcefiles, format) {
 }
 
 /**
- * Append one or more files to a specified file.
- * 
- * @param dest String filename of the file to append.
- * @param appendfiles Array of files to append
- */
-exports.appendSync = function(dest, appendfiles, format) {
-    
-}
-
-/**
  * Apply a template to an object, and write the output to a file, or return the string.
  * 
  * @param dest null|String String will be returned if null, or written to the specified filename.
@@ -61,6 +51,39 @@ exports.applyTemplateSync = function(dest, template, o, format) {
         return Mustache.to_html(templateContent, o);
     } else {
         fs.writeFileSync(dest, Mustache.to_html(templateContent, o));
+    }
+}
+
+/**
+ * Apply a string or file template using a model object to substitute variables.
+ * 
+ * @param o {Object} configuration containing .template (String template) or .templateFile (File template),
+ * .model (Object)
+ * @param callback {Function}
+ */
+exports.applyTemplate = function(o, callback) {
+    var Mustache = require('Mustache'),
+        format = 'utf8',
+        fnGotTemplate = function(templateString) {
+            var templatedString;
+            
+            // TODO: file output
+            //if (o.hasOwnProperty('dest')) {}
+            
+            templatedString = Mustache.to_html(templateString, o.model);
+            callback(templatedString);
+        };
+    
+    if (o.hasOwnProperty('templateFile')) {
+        fs.readFile(o.templateFile, format, function(err, data) {
+           if (err) {
+               console.error('Couldnt read file');
+           } else {
+               fnGotTemplate(data);
+           }
+        });
+    } else if (o.hasOwnProperty('template')) {
+        fnGotTemplate(o.template);
     }
 }
 
@@ -224,6 +247,8 @@ exports.cssLint = function(o, csslintopts, callback) {
  * 
  * @param o {Object} Object containing at least one source property:
  * { source: 'String' || sourceFile: 'Filename.js', destFile: 'Filename.js' || no destination returns string value }
+ * @param callback {Function}
+ * @public
  */
 exports.cssMinify = function(o, callback) {
     var less = require('less'),
@@ -238,7 +263,7 @@ exports.cssMinify = function(o, callback) {
         }
 
         lessParser.parse(o.source, function(err, tree) {
-           var cssCompressed = tree.toCSS({ compress: true });
+           var cssCompressed = tree.toCSS({compress: true});
            
            if (err) {
                throw err;

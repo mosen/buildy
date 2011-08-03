@@ -5,7 +5,7 @@ var Queue = require('buildy/lib/queue').Queue,
     
     
 // build a javascript component
-new Queue('build my component').task('files', ['./js/test1.js', './js/test2.js']) // all of these synchronous
+new Queue('build my component').task('files', ['./js/*', './js/test2.js']) // all of these synchronous
     .task('concat')
     .task('jslint')
     .task('fork', {
