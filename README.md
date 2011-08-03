@@ -1,73 +1,80 @@
-What?
-=====
+What
+====
 
-buildy aims to be an asynchronous build system for node.js
+Buildy is a build system for javascript/node.js projects.
+
+The aim is:
+    - relatively brief syntax
+    - asynchronous build tasks
+    - sequential and parallel build tasks (where possible).
 
 *It's really really young right now, in its alpha stage*
 
-Why?
-====
-
-Because the core philosophy of node.js is asynchronous operation. But I think
-the author of vows, a BDD testing framework, put it better in their main blurb:
+I compare it to the core philosophy of vows.js:
 
 > The first, and obvious reason is that node.js is asynchronous, and therefore our tests should be. 
 > The second reason is to make tests which target I/O run much faster, by running them concurrently. 
 
-Pretty ironically quite a few buildy tasks run synchronously at the moment, but 
-the idea is to move to asynchronous/event driven operation. The first priority
-was ease of use, or - how can you get a lot of value without writing much code.
+Do things
+=========
 
-Examples
-========
-
-buildy supports a chaining syntax which is pretty similar looking to jQuery.
-
-Example 1. Compress all the things
-----------------------------------
-
-This is the most generic scenario I can think of: you have your code in multiple files, and you want to 
-join them together, minify them, and then write the result out to another file that you serve up.
+Concatenate scripts, minify, and write to release directory
+-----------------------------------------------------------
 
 ```javascript
-var Buildy = require('buildy').Buildy,
-    buildy = new Buildy();
+var b = new Buildy();
 
-buildy.files('*.js').concat().minify().write('javascript.js');
+new Queue('release version')
+    .task('files', ['./js/test1.js', './js/test2.js'])
+    .task('concat')
+    .task('minify')
+    .task('write', { name: "./build/test-min.js" })
+    .run(b);
 ```
 
-Example 2. When all you need is a fork
---------------------------------------
-
-Wait a second, thats all sequential.. what if you need to do a lot of things in parallel...
+Make a minified version and a non minified version in parallel
+--------------------------------------------------------------
 
 ```javascript
-var Buildy = require('buildy').Buildy,
-    buildy = new Buildy();
+var b = new Buildy();
 
-buildy.files('*.js').concat().fork([
-    function(buildy, callback) {
-	buildy.write('javascript-concat.js');
-	callback();
-    },
-    function(buildy, callback) {
-	buildy.jslint();
-	callback();
-    },
-    function(buildy, callback) {
-	buildy.minify().write('javascript-min.js');
-    }
-]);
+new Queue('build process')
+    .task('files', ['./js/test1.js', './js/test2.js'])
+    .task('concat')
+    .task('fork', {
+        'raw version' : function(b) {
+            this.task('write', { name: './build/test.js' }).run(b);
+        },
+        'minified version' : function(b) {
+            this.task('minify').task('write', { name: './build/test-min.js' }).run(b);
+        }
+    }).run(b);
 ```
 
-And now you have 2 files, one concatenated for debugging, and one minified version, and jslint output from your original source.
+How it works
+============
 
-Task Reference
-==============
+There are two objects, Buildy and Queue.
+Buildy performs the work, and Queue describes the parameters and flow of the 
+build tasks.
+
+Most tasks execute one after the other, even though they may be asynchronous.
+The exception is the 'fork' task.
+
+Each time you add a fork task, it becomes a new Queue with the name specified ('raw version' 
+in the last example). The new queue gets its own buildy object with the output from the previous task.
+
+In a sense the functions you add to 'fork' are a clean queue, just the same as writing
+new Queue('queue name').
+
+
+
+Task Reference (Incomplete)
+===========================
 
 The built in tasks are as follows:
 
-`concat()`
+`concat`
 
 * inputs: files | strings
 * outputs: string
@@ -76,7 +83,7 @@ Take the output of the previous task and concatenate it.
 
 ***
 
-`csslint(lintOptions)`
+`csslint`
 
 * inputs: file | string
 * outputs: same result as the input, does not modify
@@ -85,7 +92,7 @@ Run CSSLint on the output of the previous task
 
 ***
 
-`cssminify(options)`
+`cssminify`
 
 * inputs: file | string
 * outputs: string
@@ -94,7 +101,7 @@ Minify the input string using Less.
 
 ***
 
-`files(string|array of strings)`
+`files`
 
 * inputs: nothing
 * outputs: files
@@ -104,7 +111,7 @@ At the moment (in alpha stage) this does not support globbing.
 
 ***
 
-`fork([functions])`
+`fork`
 
 * inputs: anything
 * outputs: nothing
@@ -120,7 +127,7 @@ this feature is planned.
 
 ***
 
-`invoke(function(input){})`
+`invoke`
 
 * inputs: anything
 * outputs: nothing
@@ -129,7 +136,7 @@ Take the output of the previous task and give it to your own anonymous function.
 
 ***
 
-`jslint(lintOptions)`
+`jslint`
 
 * inputs: file | string
 * outputs: same result as the input, does not modify
@@ -140,7 +147,7 @@ is passed to JSLint as the lint options.
 
 ***
 
-`log()`
+`log`
 
 * inputs: string | strings | files
 * outputs: same result as the input, does not modify
@@ -149,7 +156,7 @@ Log the output of the previous task to the console, to inspect its current state
 
 ***
 
-`minify(options)`
+`minify`
 
 * inputs: file | string
 * outputs: string
@@ -158,7 +165,7 @@ Minify the input string using uglify-js.
 
 ***
 
-`replace(regex, replace, flags)`
+`replace`
 
 * inputs: string
 * outputs: string
@@ -167,7 +174,7 @@ Apply a regular expression to replace strings from the input.
 
 ***
 
-`template(template, model)`
+`template`
 
 * inputs: file | string
 * outputs: string
@@ -178,108 +185,10 @@ this will be configurable in the near future.
 
 ***
 
-`write(filename)`
+`write`
 
 * inputs: string
 * outputs: file
 
 Write the output of the previous task to the specified filename, the output
 is the filename of the written file which can be chained to further tasks.
-
-Asynchronous API Ideas
-======================
-
-* asynchronous tasks prefixed with 'a'
-* could have a few different calling structures
-
-Object literal of handlers
------------------------------
-
-```javascript
-buildy.aMinify({
-    'complete' : function(buildy) {
-        // continue chain
-    },
-    'failed' : function(buildy) {
-        buildy.log();
-        console.error();
-        // chain has ended
-    });
-```
-
-Return EventEmitter, Subscribe to complete
----------------------------------------------
-
-```javascript
-buildy.aMinify().on('complete', function(buildy) {
-    // continue chain
-});
-```
-
-Syntactical sugar for .on('complete', fn)
---------------------------------------------
-
-```javascript
-buildy.aMinify().then(function(buildy) {
-
-});
-```
-
-Chain combinations via variable assignment
----------------------------------------------
-
-```javascript
-var concatMinifyTask = function(buildy) {
-    buildy.concat().minify().write('min.js');
-};
-
-buildy.jslint().then(concatMinifyTask);
-```
-
-Chain combinations by define method
---------------------------------------
-
-```javascript
-
-buildy.define('lint and minify', function(buildy) {
-    return buildy.jslint().minify();
-});
-
-buildy.files('test.js').run('lint and minify')
-```
-
-Batch via instruction stack
----------------------------
-
-```javascript
-
-buildy.batch([
-    { 'minify' : [args] },
-    { 'jslint' : { args: [args], tasks: [
-    ] }
-]);
-
-after() as a global fn? handles an event and then returns the buildy object to
-continue the chain.
-
-buildy.batch([
-    { after('minify')
-]);
-
-buildy.aMinify('minify')
-after('minify').copy('destination.js');
-
-
-```
-
-Chains are synchronous and are broken by asynchronous operations
-----------------------------------------------------------------
-
-```javascript
-
-buildy.concat().aMinify('minifiedfiles');
-
-after('minifiedfiles').write('file-min.js');
-
-
-```
