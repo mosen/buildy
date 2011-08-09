@@ -8,7 +8,7 @@ The aim is:
     - asynchronous build tasks
     - sequential and parallel build tasks (where possible).
 
-*It's really really young right now, in its alpha stage*
+*It's really really young right now, so API may change*
 
 I compare it to the core philosophy of vows.js:
 
@@ -66,7 +66,6 @@ in the last example). The new queue gets its own buildy object with the output f
 
 In a sense the functions you add to 'fork' are a clean queue, just the same as writing
 new Queue('queue name').
-
 
 
 Task Reference (Incomplete)

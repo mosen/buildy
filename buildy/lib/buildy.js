@@ -16,6 +16,9 @@ function Buildy(input) {
 
 /**
  * Constants of Buildy input/output types that may exist
+ * 
+ * @property Buildy.TYPES
+ * @static
  */
 Buildy.TYPES = {
     FILES : 'FILES', // Collection of file paths, this is always an array, even with one filename
@@ -27,9 +30,10 @@ Buildy.TYPES = {
  * A convenience method for producing buildy objects.
  * 
  * @param type {String} Buildy input type (one of Buildy.TYPES)
- * @param input {Object} The data which acts as the input for the next task in the chain
+ * @param input {Object} The buildy state, the data which will be operated on
  * @return {Buildy} Instance of a buildy task
  * @public
+ * @static
  */
 Buildy.factory = function(type, input) {
     var output = new Buildy(input);
@@ -59,6 +63,7 @@ Buildy.prototype = {
     
     /**
      * Generate a list of files using a combination of names and globs
+     * 
      * 
      * @method files
      * @param filespec {Array} Array of literal filenames or globs
@@ -116,7 +121,7 @@ Buildy.prototype = {
         
         for (forkName in forkspec) {
            childQueue = new Queue(forkName);
-           childQueue._queue = [];
+           childQueue._queue = []; // TODO: why would a new instance carry the same instance variables?
            childQueue._nameStack.push(this._name);
            child = Buildy.factory(this._type, this._state.slice());
            forkspec[forkName].call(childQueue, child);            
@@ -129,34 +134,54 @@ Buildy.prototype = {
      * Copy a file or multiple files to a destination.
      * Can also be used to copy a file to a new file name.
      * 
-     * TODO: async mode
-     * TODO: use promise
+     * TODO: support recursive copying
      * 
-     * @param dest {String} The destination filename (if the source is a single file) or destination directory (no trailing slash)
-     * @return {Object} Buildy.FILES containing paths to the files that have been copied
+     * @param destspec {String}|{Object} String containing absolute destination or object with properties: dest, recursive: [true/false] (Not implemented)
+     * @param promise {EventEmitter}
      */
-    copy : function(dest) {
+    copy : function(destspec, promise) {
+        var numFilesToCopy = this._state.length,
+            fnCopyDone = function(err) {
+                if (err) {
+                    promise.emit('failure');
+                }
+                
+                numFilesToCopy--;
+                
+                if (numFilesToCopy == 0) {
+                    promise.emit('complete');
+                }
+            },
+            specObj = {
+                dest: (destspec instanceof String) ? destspec : destspec.dest,
+                recursive: (destspec.recursive !== undefined) ? destspec.recursive : false
+            };
+        
         switch (this._type) {
             case Buildy.TYPES.FILES:
                 // Fully qualified file to file copy
                 if (this._state.length == 1) {
-                    ju.copySync(this._state[0], dest);
-                    this._state = [dest];
+                    //ju.copySync(this._state[0], destspec);
+                    ju.copy(this._state[0], specObj.dest, fnCopyDone)
+                    
+                    this._state = [specObj.dest];
                     this._type = Buildy.TYPES.FILES;
-                    return this;
+                    
+                    promise.emit('complete');
                     
                 } else {
                     var destFiles = [];
                     // Copy the source list to a destination directory
                     // TODO: auto strip trailing slash on destination
                     this._state.forEach(function(f) {
-                       destFiles.push(dest + '/' + f);
-                       ju.copySync(f, dest + '/' + f); 
+                       destFiles.push(specObj.dest + '/' + f);
+                       ju.copy(f, specObj.dest + '/' + f, fnCopyDone); 
                     });
                     
                     this._state = destFiles;
                     this._type = Buildy.TYPES.FILES;
-                    return this;
+                    
+                    promise.emit('complete');
                 }
                 break;
                 
@@ -168,9 +193,13 @@ Buildy.prototype = {
     /**
      * Concatenate the input
      * 
-     * This task can be performed on files or strings
+     * This task can be performed on files or strings.
+     * Asynchronous concatenation is never performed.
      * 
-     * @param spec {Object} [Unused]
+     * The default output type is string, because it is better and
+     * easier to work with the in-memory representation of the concat output.
+     * 
+     * @param spec {Object} [Unused] Required for the Buildy interface
      * @param promise {EventEmitter}
      */
     concat : function(spec, promise) {
@@ -183,8 +212,6 @@ Buildy.prototype = {
                 break;
                 
             case Buildy.TYPES.FILES:
-                // Doesn't make sense to concatenate asynchronously, because we want
-                // to preserve the ordering
                 var concatString = ju.concatSync(null, this._state, 'utf8');
                 this._state = concatString;
                 this._type = Buildy.TYPES.STRING;
@@ -206,7 +233,6 @@ Buildy.prototype = {
      * 
      * @param spec {Object} jslint task configuration
      * @param promise {EventEmitter}
-     * @protected
      */
     jslint : function(spec, promise) {
         var lintOptions = spec || {};

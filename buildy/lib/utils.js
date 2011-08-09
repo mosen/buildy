@@ -85,7 +85,7 @@ exports.applyTemplate = function applyTemplate(o, callback) {
     if (o.hasOwnProperty('templateFile')) {
         fs.readFile(o.templateFile, format, function(err, data) {
            if (err) {
-               console.error('Couldnt read file');
+               console.error('Could not read specified template file: ' + o.templateFile);
            } else {
                fnGotTemplate(data);
            }
@@ -188,8 +188,8 @@ exports.minify = function(o, callback) {
             ast = pro.ast_mangle(ast);
             ast = pro.ast_squeeze(ast);
         } catch (e) {
-            console.log(e.stack);
-            throw Error('The minify task failed, most likely the source file was unparseable. Please check your syntax. Error: ' + e.message);
+            callback('The minify task failed, most likely the source file was unparseable. Please check your syntax. Error: ' + e.message);
+            return;
         }
 
         if (!o.destFile) {
@@ -313,9 +313,8 @@ var Copy = function copy(src, dst, callback) {
   self.on('validations', function() {
 
     path.exists(src, function(exists) {
-
+      
       if(!exists) {
-
         self.emit('error', new Error(src + ' does not exists. Nothing to be copied'));
         return;
       }
@@ -323,19 +322,16 @@ var Copy = function copy(src, dst, callback) {
       fs.stat(src, function(err, stat) {
 
         if(err) {
-
           self.emit('error', err);
           return;
         }
 
         if(stat.isDirectory()) {
-
           self.emit('error', new Error(src + ' is a directory. It must be a file'));
           return;
         }
 
         if(src == dst) {
-
           self.emit('error', new Error(src + ' and ' + dst + 'are identical'));
           return;
         }
@@ -350,7 +346,6 @@ var Copy = function copy(src, dst, callback) {
     fs.open(src, 'r', function(err, infd) {
 
       if(err) {
-
         self.emit('error', err);
         return;
       }
@@ -365,7 +360,6 @@ var Copy = function copy(src, dst, callback) {
     fs.open(dst, 'w', function(err, outfd) {
 
       if(err) {
-
         self.emit('error', err);
         return;
       }
@@ -379,13 +373,11 @@ var Copy = function copy(src, dst, callback) {
     fs.fstat(infd, function(err, stat) {
 
       if(err) {
-
         self.emit('error', err);
         return;
       }
       
       fs.sendfile(outfd, infd, 0, stat.size, function() {
-
         self.emit('close_fds', infd, outfd);
         callback();
       });
@@ -405,7 +397,6 @@ var Copy = function copy(src, dst, callback) {
     fs.close(outfd, function(err) {
 
       if(err) {
-
         self.emit('error', err);
       }
 
@@ -417,7 +408,7 @@ var Copy = function copy(src, dst, callback) {
 
 sys.inherits(Copy, events.EventEmitter);
    
-exports.copyAsync = function(src, dst, callback) {
+exports.copy = function(src, dst, callback) {
   return new Copy(src, dst, callback);
 };
 
