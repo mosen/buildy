@@ -2,7 +2,7 @@ var util = require('util'),
     fs = require('fs'),
     events = require('events'),
     glob = require('glob'),
-    ju = require('./utils'),
+    utils = require('./utils'),
     Queue = require('./queue').Queue;
 
 /**
@@ -121,8 +121,7 @@ Buildy.prototype = {
         
         for (forkName in forkspec) {
            childQueue = new Queue(forkName);
-           childQueue._queue = []; // TODO: why would a new instance carry the same instance variables?
-           childQueue._nameStack.push(this._name);
+           //childQueue._queueStack.push();
            child = Buildy.factory(this._type, this._state.slice());
            forkspec[forkName].call(childQueue, child);            
         }
@@ -161,8 +160,7 @@ Buildy.prototype = {
             case Buildy.TYPES.FILES:
                 // Fully qualified file to file copy
                 if (this._state.length == 1) {
-                    //ju.copySync(this._state[0], destspec);
-                    ju.copy(this._state[0], specObj.dest, fnCopyDone)
+                    utils.copy(this._state[0], specObj.dest, fnCopyDone)
                     
                     this._state = [specObj.dest];
                     this._type = Buildy.TYPES.FILES;
@@ -175,7 +173,7 @@ Buildy.prototype = {
                     // TODO: auto strip trailing slash on destination
                     this._state.forEach(function(f) {
                        destFiles.push(specObj.dest + '/' + f);
-                       ju.copy(f, specObj.dest + '/' + f, fnCopyDone); 
+                       utils.copy(f, specObj.dest + '/' + f, fnCopyDone); 
                     });
                     
                     this._state = destFiles;
@@ -212,7 +210,7 @@ Buildy.prototype = {
                 break;
                 
             case Buildy.TYPES.FILES:
-                var concatString = ju.concatSync(null, this._state, 'utf8');
+                var concatString = utils.concatSync(null, this._state, 'utf8');
                 this._state = concatString;
                 this._type = Buildy.TYPES.STRING;
                 promise.emit('complete');
@@ -241,7 +239,7 @@ Buildy.prototype = {
             
             case Buildy.TYPES.FILES:
                 this._state.forEach(function(f) {
-                    ju.lint({sourceFile: f}, lintOptions, function(result) {
+                    utils.lint({sourceFile: f}, lintOptions, function(result) {
                         var reporter = require('jslint/lib/reporter.js');
                         reporter.report(f, result);
                         
@@ -254,7 +252,7 @@ Buildy.prototype = {
             
             case Buildy.TYPES.STRING:
 
-                ju.lint({source: this._state}, lintOptions, function(result) {
+                utils.lint({source: this._state}, lintOptions, function(result) {
                     var reporter = require('jslint/lib/reporter.js');
                     reporter.report('buildy', result);
                     
@@ -266,7 +264,7 @@ Buildy.prototype = {
             case Buildy.TYPES.STRINGS:
                 
                 this._state.forEach(function(f) {
-                    ju.lint({source: f}, lintOptions, function(result) {
+                    utils.lint({source: f}, lintOptions, function(result) {
                         var reporter = require('jslint/lib/reporter.js');
                         reporter.report('buildy', result);
                         
@@ -297,7 +295,7 @@ Buildy.prototype = {
         switch (this._type) {
             case Buildy.TYPES.FILES:
                 this._state.forEach(function(f) {
-                    ju.cssLint({sourceFile: f}, lintOptions, function(result) {
+                    utils.cssLint({sourceFile: f}, lintOptions, function(result) {
                         // TODO: user defined lint output
                         console.log(result);
                     });
@@ -306,7 +304,7 @@ Buildy.prototype = {
                 break;
             
             case Buildy.TYPES.STRING:
-                ju.cssLint({source: this._state}, lintOptions, function(result) {
+                utils.cssLint({source: this._state}, lintOptions, function(result) {
                     // TODO: user defined lint output
                     console.log(result);
                 });
@@ -315,7 +313,7 @@ Buildy.prototype = {
                 
             case Buildy.TYPES.STRINGS:
                 this._state.forEach(function(s) {
-                    ju.cssLint({source: s}, lintOptions, function(result) {
+                    utils.cssLint({source: s}, lintOptions, function(result) {
                         // TODO: user defined lint output
                         console.log(result);
                     });
@@ -422,23 +420,20 @@ Buildy.prototype = {
                     }                    
                 }
                 
-                ju.minify({source: this._state}, fnMinifyCallback);
+                utils.minify({source: this._state}, fnMinifyCallback);
                 break;
                 
             case Buildy.TYPES.STRINGS:
-                var stringCount = this._state.length,
-                    stringDone = 0,
+                var stringsLeft = this._state.length,
                     outputStrings = [],
                     fnMinifyCallback = function(err, output) {
                         if (err) {
-                            console.log('cant minify');
-                            promise.emit('failed');
+                            promise.emit('failed', err);
                         } else {
                             outputStrings.push(output);
-                            stringDone++;
-                            console.log('finished minifying string');
+                            stringsLeft--;
                             
-                            if (stringDone == stringCount) {
+                            if (stringsLeft < 1) {
                                 self._state = outputStrings;
                                 promise.emit('complete');
                             }
@@ -446,7 +441,7 @@ Buildy.prototype = {
                     };
                     
                 this._state.forEach(function(s) {
-                    ju.minify({source: s}, fnMinifyCallback);
+                    utils.minify({source: s}, fnMinifyCallback);
                 });
                 break;
             
@@ -455,7 +450,7 @@ Buildy.prototype = {
                     fileDone = 0;
                     
                 this._state.forEach(function(f) {
-                    ju.minify({sourceFile: f}, function(err, output) {
+                    utils.minify({sourceFile: f}, function(err, output) {
                         if (err) {
                             promise.emit('failed');
                         } else {
@@ -493,7 +488,7 @@ Buildy.prototype = {
                     promise.emit('complete');
                 };
                 
-                ju.cssMinify({ source: this._state }, fnMinifyCallback);
+                utils.cssMinify({ source: this._state }, fnMinifyCallback);
                 break;
         }
     },
@@ -503,7 +498,7 @@ Buildy.prototype = {
      * 
      * At the moment the input automatically becomes a template variable called 'code'.
      * @todo This should be configurable to avoid a name clash
-     * @todo support more than just string inputs
+     * @todo support more than utilsst string inputs
      * @method template
      * @param spec {Object} Template task configuration { template: 'stringtemplate', templateFile: 'template.mustache', model: modelObj }
      * @param promise {EventEmitter}
@@ -519,7 +514,7 @@ Buildy.prototype = {
         switch (this._type) {
             case Buildy.TYPES.STRING:
                 spec.model.code = this._state;
-                ju.applyTemplate(spec, fnTemplateCallback);
+                utils.applyTemplate(spec, fnTemplateCallback);
                 break;
                 
             //case Buildy.TYPES.FILES:
@@ -551,13 +546,12 @@ Buildy.prototype = {
      * @method exec
      * @param type {String} Type of task to execute
      * @param spec {Object} Options to pass to the task
-     * @param promise {EventEmitter} Promise that will emit ('complete' or
+     * @param promise {EventEmitter} emitter that will emit ('complete' or
      * 'failed') upon result
      * @public
      */
     exec : function(type, spec, promise) {
-        var t = this[type];
-        t(spec, promise);
+        this[type](spec, promise);
     }
 };
 

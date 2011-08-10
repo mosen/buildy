@@ -11,22 +11,21 @@ var sys = require('sys'),
  * 
  * @param dest null|String String will be returned if null, or written to the specified filename.
  * @param sourcefiles Array of files to read and concatenate.
- * @param source file encoding (default utf8)
+ * @param encoding source file encoding (default utf8)
  */
-exports.concatSync = function(dest, sourcefiles, format) {
-    var i = 0,
-        content = '',
-        format = format || 'utf8';
+exports.concatSync = function(dest, sourcefiles, encoding) {
+    var content = '',
+        encoding = encoding || 'utf8';
     
     try { 
-        for (; i < sourcefiles.length; i++) {
-            content += fs.readFileSync(sourcefiles[i], format) || '';
-        }
+        sourcefiles.forEach(function(f) {
+            content += fs.readFileSync(f, encoding) || '';
+        });
 
         if (dest === null) {
             return content;
         } else {
-            fs.writeFileSync(dest, content, format);
+            fs.writeFileSync(dest, content, encoding);
         }
     } catch(e) {
         throw new Error('Could not read or write the files to be concatenated.');
@@ -48,7 +47,7 @@ exports.applyTemplateSync = function(dest, template, o, format) {
     try {
         var Mustache = require('Mustache');
     } catch (e) {
-        console.error('applyTemplate requires Mustache to be installed (npm install mustache)');
+        throw new Error('applyTemplate requires Mustache to be installed (npm install mustache)');
     }
     
     if (dest === null) {
@@ -99,69 +98,35 @@ exports.applyTemplate = function applyTemplate(o, callback) {
  * Run JSLint|JSHint on a string or file.
  * 
  * @param o {Object} Object containing properties .source | .sourceFile, string or file to lint respectively.
- * @param lintopts {Object} JSLint configuration options
+ * @param options {Object} JSLint options
  * @param callback {Function} Callback function when lint has finished.
+ * @param encoding {String} [Optional] Encoding to use for files, default 'utf8'
  */
-exports.lint = function(o, lintopts, callback) {
+exports.lint = function(o, options, callback, encoding) {
     
     var linter = require('jslint/lib/linter.js'),
-        reporter = require('jslint/lib/reporter.js'),
-        opts = lintopts || {},
+        //reporter = require('jslint/lib/reporter.js'),
         result;
+        
+    options = options || {};
+    encoding = encoding || 'utf8';
 
     if (o.source && o.source.length > 0) {
-        result = linter.lint(o.source, opts);
+        result = linter.lint(o.source, options);
         callback(result);
     } else if (o.sourceFile && o.sourceFile.length > 0) {
-        fs.readFile(o.sourceFile, 'utf8', function(err, data) {
-           
+        fs.readFile(o.sourceFile, encoding, function(err, data) {   
            if (err) {
                throw err;
            } 
-           
-           data = data.toString('utf8');
-          
-           result = linter.lint(data, opts);
-           reporter.report(o.sourceFile, result);
+
+           result = linter.lint(data.toString(encoding), options);
+           // TODO: report results in builder output, not here in utils
+           //reporter.report(o.sourceFile, result);
            callback(result);
         });
     } else {
         callback();
-    }
-}
-
-/**
- * Minify a source file or string to a destination file or string
- * 
- * @param o {Object} Object containing at least one source property:
- * { source: 'String' || sourceFile: 'Filename.js', destFile: 'Filename.js' || no destination returns string value }
- */
-exports.minifySync = function(o) {
-    if (!(o.source || o.sourceFile)) {
-        throw 'No source specified';
-    } else {
-        if (o.sourceFile) {
-            o.source = fs.readFileSync(o.sourceFile, 'utf8');
-        }
-        
-        var jsp = require("uglify-js").parser,
-            pro = require("uglify-js").uglify,
-            ast;
-
-        try {
-            ast = jsp.parse(o.source); // parse into syntax tree
-            ast = pro.ast_mangle(ast);
-            ast = pro.ast_squeeze(ast);
-        } catch (e) {
-            console.log(e.stack);
-            fail('The minify task failed, most likely the source file was unparseable. Please check your syntax. Error: ' + e.message);
-        }
-       
-        if (!o.destFile) {
-            return pro.gen_code(ast);
-        } else {
-            fs.writeFileSync(o.destFile, pro.gen_code(ast), 'utf8');
-        }
     }
 }
 
@@ -253,6 +218,7 @@ exports.cssLint = function(o, csslintopts, callback) {
 /*
  * Minify a css source file or string to a destination file or string
  * 
+ * @todo Async this
  * @param o {Object} Object containing at least one source property:
  * { source: 'String' || sourceFile: 'Filename.js', destFile: 'Filename.js' || no destination returns string value }
  * @param callback {Function}
@@ -263,7 +229,7 @@ exports.cssMinify = function(o, callback) {
         lessParser = new less.Parser;
         
     if (!(o.source || o.sourceFile)) {
-        throw 'No source specified';
+        throw new TypeError('No source specified');
         
     } else {
         if (o.sourceFile) {
@@ -278,8 +244,6 @@ exports.cssMinify = function(o, callback) {
            }
 
            if (o.destFile) {
-               console.log(cssCompressed);
-               console.log('Writing to ' + o.destFile);
                fs.writeFile(o.destFile, cssCompressed, 'utf8', function(err) {
                    if (err) {
                        throw err;
