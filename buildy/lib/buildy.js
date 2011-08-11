@@ -1,8 +1,11 @@
 var util = require('util'),
     fs = require('fs'),
+    path = require('path'),
     events = require('events'),
     glob = require('glob'),
     utils = require('./utils'),
+    mkdirp = require('mkdirp').mkdirp,
+    cprf = require('./cprf').cprf,
     Queue = require('./queue').Queue;
 
 /**
@@ -187,6 +190,21 @@ Buildy.prototype = {
                 promise.emit('failure');
         }
     },
+    
+    copy2 : function(spec, promise) {
+        // spec.src
+        // spec.dest
+        // spec.recursive true|false
+        // spec.excludes ['name']
+        
+        cprf(spec.src, spec.dest, function() {
+            console.log('Done copying');
+            promise.emit('complete');
+        }, { 
+            recursive : spec.recursive || false,
+            excludes  : spec.excludes || []
+        })
+    },
 
     /**
      * Concatenate the input
@@ -333,22 +351,40 @@ Buildy.prototype = {
      * This can only apply to single string inputs.
      * 
      * @param spec {Object} options containing .name (filename)
+     * @param promise {EventEmitter}
      * @return {Object} Buildy.TYPES.FILES Buildy Task
      */
     write : function(spec, promise) {
-        var self = this;
-        
-        switch (this._type) {
-            case Buildy.TYPES.STRING:
-                fs.writeFile(spec.name, this._state, 'utf8', function(err) {
+        var self = this,
+            pathAbs = path.resolve(path.dirname(spec.name)),
+            fnWriteFile = function fnWriteFile() {
+                fs.writeFile(spec.name, self._state, 'utf8', function(err) {
                     if (err) { 
-                        promise.emit('failed'); 
+                        promise.emit('failed', err);
                     } else {
                         self._state = [spec.name];
                         self._type = Buildy.TYPES.FILES;
-                        
+
                         promise.emit('complete');
                     }
+                });               
+            };
+        
+        switch (this._type) {
+            case Buildy.TYPES.STRING:
+                path.exists(pathAbs, function(exists) {
+                    
+                    if (!exists) {
+                        mkdirp(pathAbs, '0755', function(err) {
+                            if (err) {
+                                promise.emit('failed', err);
+                                return;
+                            }
+                            
+                            fnWriteFile();
+                        });
+                    }
+
                 });
                 break;
             

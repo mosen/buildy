@@ -44,3 +44,10 @@ nq.task('files', ['./css/test1.css', './css/test2.css'])
             this.task('cssminify').task('write', { name: './build/test-min.css' }).run(b);
         }
     }).run(new Buildy());
+
+new Queue('copy2 test').task('copy2', {
+    src : ['*'],
+    dest : '../copytest',
+    excludes : ['css/'],
+    recursive : true
+}).run(new Buildy());
