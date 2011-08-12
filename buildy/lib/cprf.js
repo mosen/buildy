@@ -15,6 +15,7 @@
  *      excludes  : ['FILE']
  * });
  * 
+ * TODO: overwrite option true/false
  */
 var events = require('events'),
     util   = require('util'),
@@ -23,10 +24,15 @@ var events = require('events'),
     mkdirp = require('mkdirp').mkdirp,
     glob   = require('glob');
 
-// Node.js Copy (https://github.com/piscis)
-// 
-// Forked into here to support automatic directory creation on the destination.
-
+/**
+ * Asynchronous copy, adapted from (https://github.com/piscis)
+ * 
+ * @method Copy
+ * @param src {String} Source file
+ * @param dst {String} Destination file
+ * @param callback {Function} Callback
+ * @constructor
+ */
 var Copy = function copy(src, dst, callback) {
   var self = this;
 
@@ -38,49 +44,39 @@ var Copy = function copy(src, dst, callback) {
       callback(err);
   });
 
-  self.on('validate', function() {     
-      self.emit('validate_source');
-      
-      // validate:source
-      // validate:dest
-      // validate:files
-  });
-  
-  self.on('validate_source', function() {
-      
+  function _validateSource() {
       path.exists(src, function(src_exists) {
           if(!src_exists) {
               self.emit('error', new Error(src + ' does not exist. Nothing to be copied'));
               return;
           }
           
-          self.emit('validate_dest');
-      });
-  });
+          _validateDest();
+      });      
+  }
   
-  self.on('validate_dest', function() {
+  function _validateDest() {
       path.exists(path.dirname(dst), function(dst_exists) {
-//          console.log('Destination directory does not exist, creating...');
           if (!dst_exists) {
               // mkdirp refuses to use relative paths
               var pathAbs = path.resolve(path.dirname(dst));
-              
+
               mkdirp(pathAbs, 0755, function(err) {
                   if (err) {
                       self.emit('error', err);
                       return;
                   }
 
-                  self.emit('validate_files');
+                  _validateFiles();
               });
           } else {
-              self.emit('validate_files');
+              _validateFiles();
           }
-      });
-  });
-  
-  self.on('validate_files', function() {
-      fs.stat(src, function(err, stat) {
+      });    
+  }
+
+  function _validateFiles() {
+       fs.stat(src, function(err, stat) {
 
         if(err) {
           self.emit('error', err);
@@ -97,12 +93,11 @@ var Copy = function copy(src, dst, callback) {
           return;
         }
 
-        self.emit('open_infd');
-      });
-  });
-
-  self.on('open_infd', function() {
-
+        _openInputFile();
+      });    
+  }
+  
+  function _openInputFile() {
     fs.open(src, 'r', function(err, infd) {
 
       if(err) {
@@ -110,13 +105,11 @@ var Copy = function copy(src, dst, callback) {
         return;
       }
 
-      self.emit('open_outfd', infd);
-    });
-
-  });
-
-  self.on('open_outfd', function(infd) {
-
+      _openOutputFile(infd);
+    });    
+  }
+  
+  function _openOutputFile(infd) {
     fs.open(dst, 'w', function(err, outfd) {
 
       if(err) {
@@ -124,54 +117,52 @@ var Copy = function copy(src, dst, callback) {
         return;
       }
 
-      self.emit('sendfile', infd, outfd);
-    });
-  });
+      _sendFile(infd, outfd);
+    });      
+  }
+  
+    function _sendFile(infd, outfd) {
+        fs.fstat(infd, function(err, stat) {
 
-  self.on('sendfile', function(infd, outfd) {
+          if(err) {
+            self.emit('error', err);
+            return;
+          }
 
-    fs.fstat(infd, function(err, stat) {
+          fs.sendfile(outfd, infd, 0, stat.size, function() {
+            _closeFiles([infd, outfd]);
+            callback();
+          });
+        });      
+    }
 
-      if(err) {
-        self.emit('error', err);
-        return;
-      }
-      
-      fs.sendfile(outfd, infd, 0, stat.size, function() {
-        self.emit('close_fds', infd, outfd);
-        callback();
+    function _closeFiles(fds) {
+      fds.forEach(function(fd) {
+         fs.close(fd, function(err) {
+            if (err) { return self.emit('error', err); } 
+         });
       });
-    });
-  });
 
-  self.on('close_fds', function(infd, outfd) {
-
-    fs.close(infd, function(err) {
-
-      if(err) {
-        self.emit('error', err);
-      }
-
-    });
-
-    fs.close(outfd, function(err) {
-
-      if(err) {
-        self.emit('error', err);
-      }
-
-    });
+      self.emit('done', src, dst);
+    }
     
-    self.emit('done', src, dst);
-  });
-
-  self.emit('validate');
+    _validateSource();
 };
 
 util.inherits(Copy, events.EventEmitter);
-   
+
+/**
+* Copy a single file to a destination
+* 
+* @method copy
+* @param src {String} source file
+* @param dst {String} destination file
+* @param callback {Function} callback
+* @public
+* @static
+*/
 exports.copy = function(src, dst, callback) {
-  return new Copy(src, dst, callback);
+    return new Copy(src, dst, callback);
 };
 
 // My own cprf object
