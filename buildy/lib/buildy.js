@@ -1,14 +1,21 @@
-var util = require('util'),
-    fs = require('fs'),
-    path = require('path'),
+var util   = require('util'),
+    fs     = require('fs'),
+    path   = require('path'),
     events = require('events'),
-    glob = require('glob'),
-    utils = require('./utils'),
+    glob   = require('glob'),
+    utils  = require('./utils'),
     mkdirp = require('mkdirp').mkdirp,
-    cprf = require('./cprf').cprf,
-    Queue = require('./queue').Queue;
+    cprf   = require('./cprf').cprf,
+    Queue  = require('./queue').Queue;
 
 /**
+ * The buildy object executes Queue tasks.
+ * There is generally one buildy per Queue, because it carries
+ * the output of the previous task with it to the next.
+ * 
+ * In a forked task situation, a new buildy object is created for the fork
+ * which inherits the state information of the parent.
+ * 
  * @class Buildy
  * @param input {Object} Initial state
  * @constructor
@@ -21,7 +28,8 @@ function Buildy(input) {
  * Constants of Buildy input/output types that may exist
  * 
  * @property Buildy.TYPES
- * @static
+ * @type Object
+ * @final
  */
 Buildy.TYPES = {
     FILES : 'FILES', // Collection of file paths, this is always an array, even with one filename
@@ -67,6 +75,7 @@ Buildy.prototype = {
     /**
      * Generate a list of files using a combination of names and globs
      * 
+     * @todo abstract the recursive globbing of Cprf to share with this
      * 
      * @method files
      * @param filespec {Array} Array of literal filenames or globs
@@ -125,7 +134,6 @@ Buildy.prototype = {
         for (forkName in forkspec) {
            childQueue = new Queue(forkName);
            var childState = (this._state instanceof Object) ? this._state.slice() : this._state;
-//           child = Buildy.factory(this._type, this._state.slice());
            child = Buildy.factory(this._type, childState);
            forkspec[forkName].call(childQueue, child);            
         }
@@ -134,73 +142,23 @@ Buildy.prototype = {
     },
     
     /**
-     * Copy a file or multiple files to a destination.
-     * Can also be used to copy a file to a new file name.
+     * Copy a number of sources to a destination
+     * (Supports wildcard matching and exclusion list)
      * 
-     * TODO: support recursive copying
+     * spec {
+     *  src : [ 'file', 'directory', 'file.*', 'directory/*' ],
+     *  dest : '/absolute/or/relative/path',
+     *  recursive : true, false
+     *  excludes : [ 'excludedfile', 'excluded/directory/' ] - wildcards currently not supported
+     * }
      * 
-     * @param destspec {String}|{Object} String containing absolute destination or object with properties: dest, recursive: [true/false] (Not implemented)
-     * @param promise {EventEmitter}
+     * @method copy
+     * @param spec {Object} task specification
+     * @param promise {EventEmitter} task promise
      */
-    copy : function(destspec, promise) {
-        var numFilesToCopy = this._state.length,
-            fnCopyDone = function(err) {
-                if (err) {
-                    promise.emit('failure');
-                }
-                
-                numFilesToCopy--;
-                
-                if (numFilesToCopy == 0) {
-                    promise.emit('complete');
-                }
-            },
-            specObj = {
-                dest: (destspec instanceof String) ? destspec : destspec.dest,
-                recursive: (destspec.recursive !== undefined) ? destspec.recursive : false
-            };
-        
-        switch (this._type) {
-            case Buildy.TYPES.FILES:
-                // Fully qualified file to file copy
-                if (this._state.length == 1) {
-                    utils.copy(this._state[0], specObj.dest, fnCopyDone)
-                    
-                    this._state = [specObj.dest];
-                    this._type = Buildy.TYPES.FILES;
-                    
-                    promise.emit('complete');
-                    
-                } else {
-                    var destFiles = [];
-                    // Copy the source list to a destination directory
-                    // TODO: auto strip trailing slash on destination
-                    this._state.forEach(function(f) {
-                       destFiles.push(specObj.dest + '/' + f);
-                       utils.copy(f, specObj.dest + '/' + f, fnCopyDone); 
-                    });
-                    
-                    this._state = destFiles;
-                    this._type = Buildy.TYPES.FILES;
-                    
-                    promise.emit('complete');
-                }
-                break;
-                
-            default:
-                promise.emit('failure');
-        }
-    },
-    
-    copy2 : function(spec, promise) {
-        // spec.src
-        // spec.dest
-        // spec.recursive true|false
-        // spec.excludes ['name']
-        
+    copy : function(spec, promise) {
         cprf(spec.src, spec.dest, function() {
-            console.log('Done copying');
-            promise.emit('complete');
+            promise.emit('complete', 'copy', spec);
         }, { 
             recursive : spec.recursive || false,
             excludes  : spec.excludes || []
@@ -219,8 +177,7 @@ Buildy.prototype = {
      * @param spec {Object} [Unused] Required for the Buildy interface
      * @param promise {EventEmitter}
      */
-    concat : function(spec, promise) {
-        
+    concat : function(spec, promise) { 
         switch (this._type) {
             case Buildy.TYPES.STRINGS:
                 this._state = this._state.join();
@@ -267,6 +224,7 @@ Buildy.prototype = {
                 
                 });
                 promise.emit('complete');
+                
                 break;
             
             case Buildy.TYPES.STRING:
@@ -294,7 +252,9 @@ Buildy.prototype = {
                 break;
                 
             default:
-                promise.emit('failure');
+                promise.emit('failure', 'jslint', { 
+                    message: 'The input wasnt supported by this task.' 
+                });
                 break;
         }
     },

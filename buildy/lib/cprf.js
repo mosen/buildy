@@ -16,7 +16,6 @@
  * });
  * 
  */
-
 var events = require('events'),
     util   = require('util'),
     fs     = require('fs'),
@@ -178,21 +177,49 @@ exports.copy = function(src, dst, callback) {
 // My own cprf object
 
 function Cprf(sources, destination, callback, options) {
-    var self = this;
-    // Array of operations pending
-    // 
-    // Format? Needs a GUID if we consider two copy operations
-    // with the same parameters as a valid thing, but its not
-    // because I said so.
+    
+    var self = this; // Necessary to correct scope inside async functions without using .call .apply
+    events.EventEmitter.call(this);
+
+    /**
+     * List of copy operations pending.
+     *
+     * @property _pendingOperations
+     * @type {Array}
+     */
     this._pendingOperations = [];
     
-    //events.EventEmitter.call(this);
+    /**
+     * Callback executed on completion.
+     * 
+     * @property _callback
+     * @type {Function}
+     */
     this._callback = callback = callback || function(){};
+    
+    /**
+     * Options
+     * 
+     * excludes : [], An array of path and filename exclusions, these will not be copied.
+     * recursive : true | false, Whether to traverse subdirectories when copying.
+     * 
+     * @property _options
+     * @type {Object}
+     */
     this._options = options = options || { excludes: [], recursive: false };
     
+    /**
+     * Error event
+     * 
+     * @event error
+     * @param err {Error} Error object
+     */
     self.on('error', function(err) {
        callback(err); 
     });
+    
+    // Logging events
+    // TODO: remove and replace with interesting events for the code instantiating this.
     
     self.on('warning', function(warning) {
        console.log('warning: ' + warning); 
@@ -206,6 +233,8 @@ function Cprf(sources, destination, callback, options) {
        console.log('pending: ' + self._pendingOperations.length + ' operation(s)');
     });
     
+    
+    
     self.on('taskdone', function() {
        if (self._pendingOperations.length == 0) {
            self.emit('batchdone');
@@ -215,85 +244,95 @@ function Cprf(sources, destination, callback, options) {
     
     // The parser found a valid thing to copy, start copying it regardless
     // of the parser being finished
-    self.on('add', function(fs_items, dest) {
-        //console.log('event:add src:' + fs_items + ' dest:' + dest);
-        
-        fs_items.forEach(function eachFile(fs_item) {
-            
-            if (self.isNotExcluded(fs_item)) {
-                
-                fs.stat(fs_item, function callbackStat(err, stat) {
-                       if (err) { 
-                           self.emit('warning', err);
-                           return; 
-                       }
-
-                       if (stat.isDirectory()) {
-                           self.emit('info', 'traversing ' + fs_item);
-                           
-                           fs.readdir(fs_item, function(err, files) {
-                              var appendDir = function appendDir(child) {
-                                  return path.join(fs_item, child);
-                              };
-
-                              if (err) { 
-                                  self.emit('warning', err);
-                                  return;
-                              }
-
-                              if (files.length > 0) {
-                                self.emit('info', 'adding (globbed) files: ' + files.join(','));
-                                self.emit('add', files.map(appendDir), path.join(dest, path.basename(fs_item)));
-                              }
-                           });
-                       } else {
-                           self.emit('info', 'copy ' + fs_item + ' ' + dest);
-                           self.emit('copy', fs_item, path.join(dest, path.basename(fs_item)));
-                       }
-                 });
-            } else {
-                self.emit('info', 'excluded ' + fs_item);
-            }
-        });
-    });
+//    self.on('add', function(fs_items, dest) {
+//        //console.log('event:add src:' + fs_items + ' dest:' + dest);
+//        
+//        fs_items.forEach(function eachFile(fs_item) {
+//            
+//            if (self.isNotExcluded(fs_item)) {
+//                
+//                fs.stat(fs_item, function callbackStat(err, stat) {
+//                       if (err) { 
+//                           self.emit('warning', err);
+//                           return; 
+//                       }
+//
+//                       if (stat.isDirectory()) {
+//                           self.emit('info', 'traversing ' + fs_item);
+//                           
+//                           fs.readdir(fs_item, function(err, files) {
+//                              var appendDir = function appendDir(child) {
+//                                  return path.join(fs_item, child);
+//                              };
+//
+//                              if (err) { 
+//                                  self.emit('warning', err);
+//                                  return;
+//                              }
+//
+//                              if (files.length > 0) {
+//                                self.emit('info', 'adding (globbed) files: ' + files.join(','));
+//                                self.emit('add', files.map(appendDir), path.join(dest, path.basename(fs_item)));
+//                              }
+//                           });
+//                       } else {
+//                           self.emit('info', 'copy ' + fs_item + ' ' + dest);
+//                           self.emit('copy', fs_item, path.join(dest, path.basename(fs_item)));
+//                       }
+//                 });
+//            } else {
+//                self.emit('info', 'excluded ' + fs_item);
+//            }
+//        });
+//    });
     
-    self.on('copy', function(source, destination) {
-       self.emit('info', 'start ' + source + ' ' + destination);
-       self._pendingOperations.push(source+'>'+destination); // Cant use an object reference, it copies and exits before adding the operation
+//    self.on('copy', function(source, destination) {
+//       self.emit('info', 'start ' + source + ' ' + destination);
+//       self._pendingOperations.push(source+'>'+destination); // Cant use an object reference, it copies and exits before adding the operation
+//
+//       
+//       var op = new Copy(source, destination, function onCopied(err) {
+//           if (err) {
+//               self.emit('error', err);
+//           }
+//           
+//           self._pendingOperations.splice(self._pendingOperations.indexOf(source+'>'+destination), 1);
+//           self.emit('pending');
+//           self.emit('taskdone');
+//           self.emit('info', 'done ' + source + ' ' + destination);
+//       });
+//       
+//       self.emit('pending');
+//    });
 
-       
-       var op = new Copy(source, destination, function onCopied(err) {
-           if (err) {
-               self.emit('error', err);
-           }
-           
-           self._pendingOperations.splice(self._pendingOperations.indexOf(source+'>'+destination), 1);
-           self.emit('pending');
-           self.emit('taskdone');
-           self.emit('info', 'done ' + source + ' ' + destination);
-       });
-       
-       self.emit('pending');
-    });
-
-    this.parse(sources, destination);
+//    this.parse(sources, destination);
 };
 
 util.inherits(Cprf, events.EventEmitter);
 
-console.log(Cprf.prototype.emit);
-
+/**
+* Check a file or directory against the exclusion list, used with Array.map
+* 
+* @method isNotExcluded
+* @param filename {String} File or directory name
+* @return {Boolean} true if the file does NOT exist in the exclusion list
+*/
 Cprf.prototype.isNotExcluded = function isNotExcluded(filename) {
     return (this._options.excludes.indexOf(filename) === -1);
 };
 
-// Parse an array of filenames and file globs, and expand the globs into
-// individual entries
+/**
+ * Parse a list of source files, directories and globs and add copy tasks for
+ * each to the given destination.
+ * 
+ * @todo make sure single file copy works here
+ * @method parse
+ * @param sources {Array} filenames, directories and globs/wildcards
+ * @param destination {String} destination directory
+ */
 Cprf.prototype.parse = function parse(sources, destination) {
         var self = this,
-            isNotExcluded = function isNotExcluded(filename) {
-                return (self._options.excludes.indexOf(filename) === -1);
-            };
+            isNotExcluded = this.isNotExcluded;
         
         sources.forEach(function(item) {
 
@@ -303,26 +342,174 @@ Cprf.prototype.parse = function parse(sources, destination) {
                    if (err) {
                        self.emit('warning', err);
                        return; 
-                   } // Glob matching failure is discarded
+                   } // Glob matching failure is just discarded
 
                    var filteredMatches = matches.filter(isNotExcluded);
                    
-                   self.emit('info', 'Adding (glob matches): ' + filteredMatches.join(','));                   
-                   self.emit('add', filteredMatches, destination);
+                   /**
+                    * @event globMatched
+                    * @param item {String} Glob that was matched
+                    * @param filteredMatches {Array} Array of matches to the glob
+                    */
+                   self.emit('globMatched', item, filteredMatches);                   
+                   self.add(filteredMatches, destination);
                 });
             } else {
                 if (isNotExcluded(item)) {
-                    self.emit('info', 'Adding: ' + item);
-                    self.emit('add', [item], destination);
+                    this.add([item], destination);
                 }
             }
 
         }, this);
         
+        // TODO: does not take into account async globs returning late
+        /**
+         * @event parseDone
+         */
         this.emit('parseDone');    
 };
 
-// Public API
+/**
+ * Add a file or directory to the copy queue.
+ * 
+ * @todo Check that destination can be single file
+ * 
+ * @method add
+ * @param fs_items {Array} Array of source dirs and files.
+ * @param dest {String} Destination directory
+ */
+Cprf.prototype.add = function add(fs_items, dest) {
+    var self = this;
+    
+    fs_items.forEach(function eachFile(fs_item) {
+        if (self.isNotExcluded(fs_item)) {
+            fs.stat(fs_item, function callbackStat(err, stat) {
+                   if (err) { // If we cant even stat, just disregard the file with warning.
+                       return self.emit('warning', err);
+                   }
+
+                   if (stat.isDirectory()) {
+                       /**
+                        * @event traversed
+                        * @param {String} fs_item Directory being traversed
+                        */
+                       self.emit('traversed', fs_item);
+
+                       fs.readdir(fs_item, function(err, files) {
+                          var appendDir = function appendDir(child) {
+                              return path.join(fs_item, child);
+                          };
+
+                          if (err) { 
+                              return self.emit('warning', err);
+                          }
+
+                          if (files.length > 0) {
+                              self.add(files.map(appendDir), path.join(dest, path.basename(fs_item)));
+                          }
+                          // TODO: consider mkdir even on empty dirs?
+                       });
+                   } else {
+                       this.copy(fs_item, path.join(dest, path.basename(fs_item)));
+                   }
+             });
+        } else {
+            /**
+             * @event excluded
+             * @param {String} fs_item Directory or file that was excluded
+             */
+            self.emit('excluded', fs_item);
+        }
+    });    
+};
+
+/**
+ * Copy a single item from source to destination
+ * 
+ * @method copy
+ * @param source {String} absolute filename of source
+ * @param destination {String} absolute filename of destination
+ */
+Cprf.prototype.copy = function copy(source, destination) {
+
+       var copyPromise = new events.EventEmitter();
+       copyPromise.on('complete', this._onTaskComplete.apply(this, [true, copyPromise, source, destination]));
+       copyPromise.on('failed', this._onTaskComplete.apply(this, [false, copyPromise, source, destination]))
+       
+       this._pendingOperations.push(copyPromise);
+
+       /**
+        * @event fileStart
+        * @param source {String} absolute filename
+        * @param destination {String} absolute filename
+        */
+       this.emit('fileStart', source, destination);
+
+       var operation = new Copy(source, destination, function onCopied(err) {
+           if (err) {
+               copyPromise.emit('failed', err);
+           }
+           
+           copyPromise.emit('complete');
+       });   
+};
+
+/**
+ * Handle the completion of a copy task by removing it from the queue
+ * 
+ * @method _onTaskComplete
+ * @param status {Boolean} Whether the copy task completed or failed. true|false
+ * @param promise {EventEmitter} copy task promise that has fired complete.
+ * @param source {String} Absolute path to source file
+ * @param destination {String} Absolute path to destination file
+ * @protected
+ */
+Cprf.prototype._onTaskComplete = function _onTaskComplete(status, promise, source, destination) {
+    this._pendingOperations.splice(this._pendingOperations.indexOf(promise), 1);
+    
+    /**
+     * @event fileComplete
+     * @param source {String} absolute filename
+     * @param destination {String} absolute filename
+     */
+    this.emit('fileComplete', source, destination);
+    this._checkOperationsDone();
+};
+
+/**
+ * Check if all of the pending operations have finished.
+ * 
+ * @method _checkOperationsDone
+ */
+Cprf.prototype._checkOperationsDone = function _checkOperationsDone() {
+    var numOperations = this._pendingOperations.length;
+    
+    /**
+     * @event operationCount
+     * @param numOperations {Integer} number of operations pending
+     */
+    this.emit('operationCount', numOperations);
+    
+    if (numOperations === 0) {
+        this.emit('complete');
+        this._callback();
+    }
+};
+
+/**
+ * Copy a list of sources to a destination
+ * 
+ * @method cprf
+ * @param sources {Array} Array of filenames, directories, and glob patterns.
+ * @param destination {String} Destination directory
+ * @param options {Object} Hash of copy options
+ * @return {Cprf} Cprf object which emits events at various stage through the copy process.
+ * @public
+ * @static
+ */
 exports.cprf = function cprf(sources, destination, callback, options) {
-    return new(Cprf)(sources, destination, callback, options);
+    var cprf = new(Cprf)(sources, destination, callback, options);
+    cprf.parse(sources, destination);
+    
+    return cprf;
 };
