@@ -97,7 +97,12 @@ Queue.prototype.run = function(runner) {
 
     this._runner = runner;
     // TODO: create reporter that watches Queue events.
-    //console.log('f:' + this._name + ' t:' + this._queuePosition + ' type=' + t.type + ' executing...');
+    console.log('task object ' + t);
+    if (t === undefined) {
+        console.log(this);
+        throw new Error('Task is undefined');
+    }
+    console.log('queue:' + this._name + ' #' + this._queuePosition + ' type=' + t.type + ' executing...');
     this._runner.exec(t.type, t.spec, this._promise);
 };
     
@@ -118,7 +123,7 @@ Queue.prototype._onTaskComplete = function(result) {
     if (this._queuePosition < this._queue.length) {
         this.run(this._runner);
     } else {
-        this.emit('complete');
+        this.emit('queueComplete');
     }
 };
     

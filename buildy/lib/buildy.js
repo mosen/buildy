@@ -124,8 +124,9 @@ Buildy.prototype = {
         
         for (forkName in forkspec) {
            childQueue = new Queue(forkName);
-           //childQueue._queueStack.push();
-           child = Buildy.factory(this._type, this._state.slice());
+           var childState = (this._state instanceof Object) ? this._state.slice() : this._state;
+//           child = Buildy.factory(this._type, this._state.slice());
+           child = Buildy.factory(this._type, childState);
            forkspec[forkName].call(childQueue, child);            
         }
         
@@ -358,6 +359,7 @@ Buildy.prototype = {
         var self = this,
             pathAbs = path.resolve(path.dirname(spec.name)),
             fnWriteFile = function fnWriteFile() {
+                
                 fs.writeFile(spec.name, self._state, 'utf8', function(err) {
                     if (err) { 
                         promise.emit('failed', err);
@@ -383,6 +385,8 @@ Buildy.prototype = {
                             
                             fnWriteFile();
                         });
+                    } else {
+                        fnWriteFile();
                     }
 
                 });
@@ -542,7 +546,7 @@ Buildy.prototype = {
      */
     template : function(spec, promise) {
         var self = this,
-            fnTemplateCallback= function(data) {
+            fnTemplateCallback = function(data) {
                 self._state = data;
                 promise.emit('complete');
             };

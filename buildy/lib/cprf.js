@@ -207,7 +207,7 @@ function Cprf(sources, destination, callback, options) {
     });
     
     self.on('taskdone', function() {
-       if (self._pendingOperations.length === 0) {
+       if (self._pendingOperations.length == 0) {
            self.emit('batchdone');
            callback();
        } 
@@ -243,7 +243,7 @@ function Cprf(sources, destination, callback, options) {
 
                               if (files.length > 0) {
                                 self.emit('info', 'adding (globbed) files: ' + files.join(','));
-                                self.emit('add', files.map(appendDir), path.join(dest, fs_item));
+                                self.emit('add', files.map(appendDir), path.join(dest, path.basename(fs_item)));
                               }
                            });
                        } else {
