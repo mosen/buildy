@@ -176,7 +176,7 @@ exports.copy = function(src, dst, callback) {
 
 // My own cprf object
 
-function Cprf(sources, destination, callback, options) {
+function Cprf(callback, options) {
     
     var self = this; // Necessary to correct scope inside async functions without using .call .apply
     events.EventEmitter.call(this);
@@ -217,95 +217,6 @@ function Cprf(sources, destination, callback, options) {
     self.on('error', function(err) {
        callback(err); 
     });
-    
-    // Logging events
-    // TODO: remove and replace with interesting events for the code instantiating this.
-    
-    self.on('warning', function(warning) {
-       console.log('warning: ' + warning); 
-    });
-    
-    self.on('info', function(info) {
-       console.log('info: ' + info); 
-    });
-    
-    self.on('pending', function() {
-       console.log('pending: ' + self._pendingOperations.length + ' operation(s)');
-    });
-    
-    
-    
-    self.on('taskdone', function() {
-       if (self._pendingOperations.length == 0) {
-           self.emit('batchdone');
-           callback();
-       } 
-    });
-    
-    // The parser found a valid thing to copy, start copying it regardless
-    // of the parser being finished
-//    self.on('add', function(fs_items, dest) {
-//        //console.log('event:add src:' + fs_items + ' dest:' + dest);
-//        
-//        fs_items.forEach(function eachFile(fs_item) {
-//            
-//            if (self.isNotExcluded(fs_item)) {
-//                
-//                fs.stat(fs_item, function callbackStat(err, stat) {
-//                       if (err) { 
-//                           self.emit('warning', err);
-//                           return; 
-//                       }
-//
-//                       if (stat.isDirectory()) {
-//                           self.emit('info', 'traversing ' + fs_item);
-//                           
-//                           fs.readdir(fs_item, function(err, files) {
-//                              var appendDir = function appendDir(child) {
-//                                  return path.join(fs_item, child);
-//                              };
-//
-//                              if (err) { 
-//                                  self.emit('warning', err);
-//                                  return;
-//                              }
-//
-//                              if (files.length > 0) {
-//                                self.emit('info', 'adding (globbed) files: ' + files.join(','));
-//                                self.emit('add', files.map(appendDir), path.join(dest, path.basename(fs_item)));
-//                              }
-//                           });
-//                       } else {
-//                           self.emit('info', 'copy ' + fs_item + ' ' + dest);
-//                           self.emit('copy', fs_item, path.join(dest, path.basename(fs_item)));
-//                       }
-//                 });
-//            } else {
-//                self.emit('info', 'excluded ' + fs_item);
-//            }
-//        });
-//    });
-    
-//    self.on('copy', function(source, destination) {
-//       self.emit('info', 'start ' + source + ' ' + destination);
-//       self._pendingOperations.push(source+'>'+destination); // Cant use an object reference, it copies and exits before adding the operation
-//
-//       
-//       var op = new Copy(source, destination, function onCopied(err) {
-//           if (err) {
-//               self.emit('error', err);
-//           }
-//           
-//           self._pendingOperations.splice(self._pendingOperations.indexOf(source+'>'+destination), 1);
-//           self.emit('pending');
-//           self.emit('taskdone');
-//           self.emit('info', 'done ' + source + ' ' + destination);
-//       });
-//       
-//       self.emit('pending');
-//    });
-
-//    this.parse(sources, destination);
 };
 
 util.inherits(Cprf, events.EventEmitter);
@@ -332,7 +243,7 @@ Cprf.prototype.isNotExcluded = function isNotExcluded(filename) {
  */
 Cprf.prototype.parse = function parse(sources, destination) {
         var self = this,
-            isNotExcluded = this.isNotExcluded;
+            isNotExcluded = function(item) { return self.isNotExcluded.call(self, item); };
         
         sources.forEach(function(item) {
 
@@ -410,7 +321,7 @@ Cprf.prototype.add = function add(fs_items, dest) {
                           // TODO: consider mkdir even on empty dirs?
                        });
                    } else {
-                       this.copy(fs_item, path.join(dest, path.basename(fs_item)));
+                       self.copy(fs_item, path.join(dest, path.basename(fs_item)));
                    }
              });
         } else {
@@ -420,7 +331,7 @@ Cprf.prototype.add = function add(fs_items, dest) {
              */
             self.emit('excluded', fs_item);
         }
-    });    
+    });
 };
 
 /**
@@ -432,9 +343,11 @@ Cprf.prototype.add = function add(fs_items, dest) {
  */
 Cprf.prototype.copy = function copy(source, destination) {
 
-       var copyPromise = new events.EventEmitter();
-       copyPromise.on('complete', this._onTaskComplete.apply(this, [true, copyPromise, source, destination]));
-       copyPromise.on('failed', this._onTaskComplete.apply(this, [false, copyPromise, source, destination]))
+       var copyPromise = new events.EventEmitter(),
+           self = this;
+           
+       copyPromise.on('complete', function() { self._onTaskComplete.apply(self, [true, copyPromise, source, destination]); });
+       copyPromise.on('failed', function() { self._onTaskComplete.apply(this, [false, copyPromise, source, destination]); });
        
        this._pendingOperations.push(copyPromise);
 
@@ -508,7 +421,7 @@ Cprf.prototype._checkOperationsDone = function _checkOperationsDone() {
  * @static
  */
 exports.cprf = function cprf(sources, destination, callback, options) {
-    var cprf = new(Cprf)(sources, destination, callback, options);
+    var cprf = new(Cprf)(callback, options);
     cprf.parse(sources, destination);
     
     return cprf;
