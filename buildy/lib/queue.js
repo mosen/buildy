@@ -1,12 +1,19 @@
 var util = require('util'),
-    events = require('events');
+    events = require('events'),
+    Reporter = require('./reporter').Reporter,
+    Buildy = require('./buildy').Buildy;
 
-function Queue(name) {
+function Queue(name, options) {
     events.EventEmitter.call(this);
 
     this._name = name;
     this._queue = [];
     this._queuePosition = 0;
+    this._queueStack = [];
+    this._initOptions(options);
+    
+//    console.log(this._name);
+//    console.log(this.on);
 }
 
 util.inherits(Queue, events.EventEmitter);
@@ -73,8 +80,38 @@ util.inherits(Queue, events.EventEmitter);
  * @public
  */
 Queue.prototype.task = function(type, spec) {
-    this._queue.push({ type: type, spec: spec });
+    this._queue.push({type: type, spec: spec});
     return this;
+};
+
+
+/**
+ * Fork the current Queue into multiple Queues
+ * 
+ * Each function receives one parameter, the child Buildy object.
+ * Each function is also executed in the context of a new Queue object. so
+ * new tasks must begin with this.task('abc')
+ * 
+ * @method _fork
+ * @param forkspec {Object} Hash of queue name : function
+ * @param promise {EventEmitter}
+ * @protected
+ */
+Queue.prototype._fork = function(forkspec) {
+    
+    var self = this,
+        runnerState = (this._runner._state instanceof Object) ? 
+                this._runner._state.slice() : this._runner._state,
+        runnerType = this._runner._type;
+    
+    Object.keys(forkspec).forEach(function eachFork(qName) {
+        var q = new Queue(qName, self._options),
+            childWorker = Buildy.factory(runnerType, runnerState);
+        
+        q._queueStack.push(this._name);
+        //q._queueStack.push.apply(q._queueStack, self._queueStack);
+        forkspec[qName].call(q, childWorker); // Child workers are sanctioned here
+    });
 };
 
 /**
@@ -90,20 +127,44 @@ Queue.prototype.task = function(type, spec) {
 Queue.prototype.run = function(runner) {
     var t    = this._queue[this._queuePosition],
         self = this;
+    
+    if (t.type === 'fork') {
+        this._fork(t.spec);
+    } else {
+    
+        this._promise = new events.EventEmitter;
+        this._promise.on('complete', function handleComplete() {self._onTaskComplete.apply(self, arguments);});
+        this._promise.on('failed', function handleFailed() {self._onTaskFailed.apply(self, arguments);});
 
-    this._promise = new events.EventEmitter;
-    this._promise.on('complete', function handleComplete() { self._onTaskComplete.apply(self, arguments); });
-    this._promise.on('failed', function handleFailed() { self._onTaskFailed.apply(self, arguments); });
+        this._runner = runner;
 
-    this._runner = runner;
-    // TODO: create reporter that watches Queue events.
-    console.log('task object ' + t);
-    if (t === undefined) {
-        console.log(this);
-        throw new Error('Task is undefined');
+        if (t === undefined) {
+            //console.log(this);
+            throw new Error('Task is undefined');
+        }
+
+        this.emit('taskStarted', {
+           queue : this._name,
+           stack : this._queueStack,
+           position : this._queuePosition,
+           type : t.type
+        });
+
+        this._runner.exec(t.type, t.spec, this._promise);
     }
-    console.log('queue:' + this._name + ' #' + this._queuePosition + ' type=' + t.type + ' executing...');
-    this._runner.exec(t.type, t.spec, this._promise);
+};
+
+Queue.prototype.next = function() {
+    
+    this._queuePosition++;
+
+    if (this._queuePosition < this._queue.length) {
+        this.run(this._runner);
+    } else {
+        this.emit('queueComplete', {
+            queue : this._name
+        });
+    }    
 };
     
 /**
@@ -117,14 +178,13 @@ Queue.prototype.run = function(runner) {
  */
 Queue.prototype._onTaskComplete = function(result) {
 
-    this.emit('taskComplete', { task: this._queue[this._queuePosition], result: result });
-    this._queuePosition++;
-
-    if (this._queuePosition < this._queue.length) {
-        this.run(this._runner);
-    } else {
-        this.emit('queueComplete');
-    }
+    this.emit('taskComplete', {
+        queue : this._name,
+        task : this._queue[this._queuePosition], 
+        result : result 
+    });
+    
+    this.next();
 };
     
 /**
@@ -138,7 +198,39 @@ Queue.prototype._onTaskComplete = function(result) {
  * @protected
  */
 Queue.prototype._onTaskFailed = function(result) {
-    this.emit('taskFailed', { result: result });
+    
+    this.emit('taskFailed', {
+        queue : this._name,
+        task : this._queue[this._queuePosition],
+        result: result 
+    });
+};
+
+/**
+ * Set up queue options as specified in the constructor
+ * 
+ * @method _initOptions
+ * @param options {Object} hash of options
+ * @protected
+ */
+Queue.prototype._initOptions = function(options) {
+    var self = this;
+    this._options = options;
+    
+    options && Object.keys(options).forEach(function(o) {
+       switch(o.toLowerCase()) {
+           case 'reporter' :
+               self._reporter = options[o];
+               self._reporter.attach(self);
+               break;
+       } 
+    });
+    
+    // Use default reporter if not supplied
+    if (!this._reporter) {
+        this._reporter = new Reporter();
+        this._reporter.attach(this);
+    }
 };
 
 

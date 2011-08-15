@@ -1,13 +1,15 @@
 /**
- * Utility functions called by the Buildy build system.
+ * A range of utility functions called by the Buildy object.
+ * 
+ * 
  */
-var sys = require('sys'),
-    util = require('util'),
-    fs = require('fs'),
-    path = require('path'),
+var sys    = require('sys'),
+    util   = require('util'),
+    fs     = require('fs'),
+    path   = require('path'),
     events = require('events'),
-    glob = require('glob'),
-    cprf = require('./cprf'),
+    glob   = require('glob'),
+    cprf   = require('./cprf'),
     mkdirp = require('mkdirp').mkdirp;
 
 /**
@@ -88,7 +90,7 @@ exports.applyTemplate = function applyTemplate(o, callback) {
     if (o.hasOwnProperty('templateFile')) {
         fs.readFile(o.templateFile, format, function(err, data) {
            if (err) {
-               console.error('Could not read specified template file: ' + o.templateFile);
+               throw new Error('Could not read specified template file: ' + o.templateFile);
            } else {
                fnGotTemplate(data);
            }
@@ -109,7 +111,7 @@ exports.applyTemplate = function applyTemplate(o, callback) {
 exports.lint = function(o, options, callback, encoding) {
     
     var linter = require('jslint/lib/linter.js'),
-        //reporter = require('jslint/lib/reporter.js'),
+        reporter = require('jslint/lib/reporter.js'),
         result;
         
     options = options || {};

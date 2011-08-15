@@ -1,6 +1,7 @@
 // This is an example build file for buildy which showcases a few of its built in features.
 var Queue = require('buildy/lib/queue').Queue,
     Buildy = require('buildy').Buildy,
+    Reporter = require('buildy/lib/reporter').Reporter,
     b = new Buildy();
     
     
@@ -45,7 +46,7 @@ nq.task('files', ['./css/test1.css', './css/test2.css'])
         }
     }).run(new Buildy());
 
-new Queue('copy2 test').task('copy2', {
+new Queue('copy test').task('copy', {
     src : ['*'],
     dest : '../copytest',
     excludes : ['css/'],

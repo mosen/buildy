@@ -95,7 +95,7 @@ Buildy.prototype = {
                     self._type = Buildy.TYPES.FILES;
                     self._state = files;
                     
-                    promise.emit('complete');
+                    promise.emit('complete', self._state.join(', '));
                 }
             },
             fnGlobResults = function(err, matches) {
@@ -114,31 +114,6 @@ Buildy.prototype = {
                 fnAddFiles([f]);
             }
         });
-    },
-    
-    /**
-     * Fork the current Buildy and start a new Queue
-     * 
-     * Each function receives one parameter, the child Buildy object.
-     * Each function is also executed in the context of a new Queue object. so
-     * new tasks must begin with this.task('abc')
-     * 
-     * @param forkspec {Object} Hash of queue name : function
-     * @param promise {EventEmitter}
-     */
-    fork : function(forkspec, promise) {
-        var child,
-            childQueue,
-            forkName;
-        
-        for (forkName in forkspec) {
-           childQueue = new Queue(forkName);
-           var childState = (this._state instanceof Object) ? this._state.slice() : this._state;
-           child = Buildy.factory(this._type, childState);
-           forkspec[forkName].call(childQueue, child);            
-        }
-        
-        promise.emit('complete');
     },
     
     /**
@@ -276,7 +251,7 @@ Buildy.prototype = {
                 this._state.forEach(function(f) {
                     utils.cssLint({sourceFile: f}, lintOptions, function(result) {
                         // TODO: user defined lint output
-                        console.log(result);
+                        //console.log(result);
                     });
                 });
                 promise.emit('complete');
@@ -285,7 +260,7 @@ Buildy.prototype = {
             case Buildy.TYPES.STRING:
                 utils.cssLint({source: this._state}, lintOptions, function(result) {
                     // TODO: user defined lint output
-                    console.log(result);
+                    //console.log(result);
                 });
                 promise.emit('complete');              
                 break;
@@ -294,7 +269,7 @@ Buildy.prototype = {
                 this._state.forEach(function(s) {
                     utils.cssLint({source: s}, lintOptions, function(result) {
                         // TODO: user defined lint output
-                        console.log(result);
+                        //console.log(result);
                     });
                 });
                 promise.emit('complete');
