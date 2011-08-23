@@ -2,18 +2,14 @@ What
 ====
 
 Buildy is a build system for javascript/node.js projects.
+It acts like a sequence of 'piped' commands.
 
-The aim is:
-    - relatively brief syntax
-    - asynchronous build tasks
-    - sequential and parallel build tasks (where possible).
+Main features:
+    - relatively brief syntax.
+    - completely asynchronous.
+    - sequential and parallel build tasks (its up to you how the build will flow).
 
-*It's really really young right now, so API may change*
-
-I compare it to the core philosophy of vows.js:
-
-> The first, and obvious reason is that node.js is asynchronous, and therefore our tests should be. 
-> The second reason is to make tests which target I/O run much faster, by running them concurrently. 
+*WARNING: API Still in development, and may change without notice*
 
 Do things
 =========
@@ -54,18 +50,20 @@ new Queue('build process')
 How it works
 ============
 
-There are two objects, Buildy and Queue.
-Buildy performs the work, and Queue describes the parameters and flow of the 
-build tasks.
+- You describe the tasks and task order using the Queue object.
+- The Queue object is given a Buildy object to execute the tasks you describe.
+- Each task is piped to the next one in sequence. The next task in the Queue receives the output of the previous one.
 
-Most tasks execute one after the other, even though they may be asynchronous.
-The exception is the 'fork' task.
+Exception
+---------
+
+The `fork` task splits the queue into sub-queues. These are run in parallel.
 
 Each time you add a fork task, it becomes a new Queue with the name specified ('raw version' 
 in the last example). The new queue gets its own buildy object with the output from the previous task.
 
-In a sense the functions you add to 'fork' are a clean queue, just the same as writing
-new Queue('queue name').
+The functions you add to 'fork' are a brand new Queue, just the same as writing
+new Queue('queue name'), except that they are instantiated with the state of the parent Queue/Buildy.
 
 
 Task Reference (Incomplete)
