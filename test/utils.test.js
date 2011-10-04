@@ -1,7 +1,8 @@
-var utils = require('../lib/utils'),
+var utils = require('utils'),
     path = require('path');
 
 // All tests expect the buildy module folder to be the CWD.
+// Run with expresso -I lib or -I lib_cov for coverage
 
 module.exports = {
     'test concatSync with null destination returns a string with non-zero length' : function(beforeExit, assert) {
