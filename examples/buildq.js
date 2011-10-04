@@ -1,15 +1,11 @@
 // This is an example build file for buildy which showcases a few of its built in features.
 var Queue = require('buildy/lib/queue').Queue,
     Buildy = require('buildy').Buildy,
-//    Reporter = require('buildy/lib/reporter').Reporter,
-    Logger = require('winston'),
     b = new Buildy();
-
-
 
     
 // build a javascript component
-new Queue('build my component').task('files', ['./js/*', './js/test2.js']) // all of these synchronous
+new Queue('build my component').task('files', ['./js/test1.js', './js/test2.js']) // all of these synchronous
     .task('concat')
     .task('jslint')
     .task('fork', {
@@ -49,9 +45,9 @@ nq.task('files', ['./css/test1.css', './css/test2.css'])
         }
     }).run(new Buildy());
 
-new Queue('copy test').task('copy', {
-    src : ['*'],
-    dest : '../copytest',
-    excludes : ['css/'],
-    recursive : true
-}).run(new Buildy());
+//new Queue('copy test').task('copy', {
+//    src : ['*'],
+//    dest : '../copytest',
+//    excludes : ['css/'],
+//    recursive : true
+//}).run(new Buildy());

@@ -54,8 +54,8 @@ How it works
 - The Queue object is given a Buildy object to execute the tasks you describe.
 - Each task is piped to the next one in sequence. The next task in the Queue receives the output of the previous one.
 
-Exception
----------
+One Exception to the Syntax
+---------------------------
 
 The `fork` task splits the queue into sub-queues. These are run in parallel.
 
@@ -104,7 +104,7 @@ Minify the input string using Less.
 * outputs: files
 
 Generate a list of filenames which will act as the input for the next task in the chain.
-At the moment (in alpha stage) this does not support globbing.
+At the moment (in alpha stage) this does not support globbing (TODO: needs cross-platform globbing).
 
 ***
 

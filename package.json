@@ -1,6 +1,6 @@
 {
     "name"         : "buildy", 
-    "version"      : "0.0.1beta", 
+    "version"      : "0.0.1",
     "description"  : "Asynchronous build system for node.js", 
     "keywords"     : ["build"], 
     "author"       : {
@@ -15,7 +15,7 @@
         "url"  : "http://github.com/mosen/buildy"
     }, 
     "dependencies" : {
-        "glob"      : ">=2.0.7",
+        "minimatch" : ">=0.0.4",
         "file"      : ">=0.1.1", 
         "mkdirp"    : ">=0.0.5", 
         "jslint"    : ">=0.1.0", 
