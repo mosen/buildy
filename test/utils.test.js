@@ -53,18 +53,18 @@ module.exports = {
             templateFile : "./test/fixtures/test.handlebars",
             model : { "content" : testString }
         }, function(err, data) {
-           assert.equal(data, testString);
+            assert.ok(!err);
+            assert.equal(data, testString);
         });
     },
-
 
 
     'smoke test lint' : function(beforeExit, assert) {
         utils.lint({
            sourceFile : './test/fixtures/test1.js'
-        }, {}, function(result) {
-           assert.isNotNull(result);
-           assert.isDefined(result);
+        }, function(err, data) {
+            assert.ok(!err);
+            assert.isDefined(data);
         });
     },
 
@@ -72,26 +72,26 @@ module.exports = {
         utils.minify({
             sourceFile : './test/fixtures/test1.js'
         }, function (err, data) {
-           assert.isNotNull(data);
-           assert.isDefined(data);
+            assert.ok(!err);
+            assert.isDefined(data);
         });
     },
 
     'smoke test cssLint' : function(beforeExit, assert) {
         utils.cssLint({
             sourceFile : './test/fixtures/test1.css'
-        }, function(result) {
-            assert.isNotNull(result);
-            assert.isDefined(result);
+        }, function(err, data) {
+            assert.ok(!err);
+            assert.isDefined(data);
         });
     },
 
     'smoke test cssMinify' : function(beforeExit, assert) {
         utils.cssMinify({
             sourceFile : './test/fixtures/test1.css'
-        }, function(err, result) {
+        }, function(err, data) {
             assert.ok(!err);
-            assert.isDefined(result);
+            assert.isDefined(data);
         });
     }
 };
