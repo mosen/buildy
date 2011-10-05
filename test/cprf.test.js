@@ -3,7 +3,13 @@ var cprf = require('buildy/lib/cprf').cprf;
 
 
 module.exports = {
-    'test cprf' : function(beforeExit, assert) {
+    'test cprf copy source to destination file' : function(beforeExit, assert) {
+
+    },
+    'test cprf exclusions list' : function(beforeExit, assert) {
+
+    },
+    'test cprf recursive flag' : function(beforeExit, assert) {
 
     }
 }

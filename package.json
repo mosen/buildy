@@ -15,15 +15,15 @@
         "url"  : "http://github.com/mosen/buildy"
     }, 
     "dependencies" : {
-        "minimatch" : "0.0.x",
-        "file"      : "0.1.x",
-        "mkdirp"    : "0.0.x",
-        "jslint"    : "0.1.x",
-        "csslint"   : "0.4.x",
-        "less"      : "1.1.x",
-        "uglify-js" : "1.0.x",
-        "mustache"  : "0.3.1-dev",
-        "winston"   : "0.3.x"
+        "minimatch"  : "0.0.x",
+        "file"       : "0.1.x",
+        "mkdirp"     : "0.0.x",
+        "jslint"     : "0.1.x",
+        "csslint"    : "0.4.x",
+        "less"       : "1.1.x",
+        "uglify-js"  : "1.0.x",
+        "handlebars" : "1.0.x",
+        "winston"    : "0.3.x"
     },
     "devDependencies" : {
         "expresso" : "0.9.x"
