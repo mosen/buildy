@@ -45,9 +45,9 @@ nq.task('files', ['./css/test1.css', './css/test2.css'])
         }
     }).run(new Buildy());
 
-//new Queue('copy test').task('copy', {
-//    src : ['*'],
-//    dest : '../copytest',
-//    excludes : ['css/'],
-//    recursive : true
-//}).run(new Buildy());
+new Queue('copy test').task('copy', {
+    src : ['css/*'],
+    dest : 'build/copytest',
+    excludes : ['js/'],
+    recursive : true
+}).run(new Buildy());
