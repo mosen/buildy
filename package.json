@@ -19,7 +19,6 @@
         "url"  : "http://github.com/mosen/buildy.git"
     }, 
     "dependencies" : {
-        "file"       : "0.1.x",
         "mkdirp"     : "0.0.x",
         "jslint"     : "0.1.x",
         "csslint"    : "0.4.x",
