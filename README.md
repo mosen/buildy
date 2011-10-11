@@ -189,3 +189,8 @@ this will be configurable in the near future.
 
 Write the output of the previous task to the specified filename, the output
 is the filename of the written file which can be chained to further tasks.
+
+Known bugs
+----------
+
+The globbing module doesn't interpret relative paths using . or ..

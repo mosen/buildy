@@ -1,21 +1,24 @@
 {
     "name"         : "buildy", 
     "version"      : "0.0.1",
-    "description"  : "Asynchronous build system for node.js", 
-    "keywords"     : ["build"], 
+    "description"  : "asynchronous build tool with chaining syntax",
+    "keywords"     : ["build", "builder"],
     "author"       : {
-        "name"  : "Mosen", 
-        "email" : "none", 
+        "name"  : "Mosen",
         "url"   : "https://github.com/mosen"
     }, 
     "files"        : ["./lib"], 
     "main"         : "./lib/buildy.js",
+    "directories"  : {
+        "lib"     : "./lib",
+        "bin"     : "./bin",
+        "example" : "./example"
+    },
     "repository"   : {
         "type" : "git", 
-        "url"  : "http://github.com/mosen/buildy"
+        "url"  : "http://github.com/mosen/buildy.git"
     }, 
     "dependencies" : {
-        "minimatch"  : "0.0.x",
         "file"       : "0.1.x",
         "mkdirp"     : "0.0.x",
         "jslint"     : "0.1.x",
