@@ -16,7 +16,7 @@
     },
     "repository"   : {
         "type" : "git", 
-        "url"  : "http://github.com/mosen/buildy.git"
+        "url"  : "https://github.com/mosen/buildy.git"
     }, 
     "dependencies" : {
         "mkdirp"     : "0.0.x",
