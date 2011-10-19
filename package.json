@@ -1,6 +1,6 @@
 {
     "name"         : "buildy", 
-    "version"      : "0.0.1",
+    "version"      : "0.0.3",
     "description"  : "asynchronous build tool with chaining syntax",
     "keywords"     : ["build", "builder"],
     "author"       : {

@@ -194,3 +194,8 @@ Known bugs
 ----------
 
 The globbing module doesn't interpret relative paths using . or ..
+
+TODO
+====
+
+* Separate the logger logic from the other modules.
