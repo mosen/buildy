@@ -6,8 +6,9 @@ It acts like a sequence of 'piped' commands.
 
 Main features:
     - relatively brief syntax.
-    - completely asynchronous.
+    - uses asynchronous api where practical.
     - sequential and parallel build tasks (its up to you how the build will flow).
+    - [coming soon] extensible tasks, integrate your own tools, or any 3rd party tool.
 
 *WARNING: API Still in development, and may change without notice*
 
@@ -18,52 +19,47 @@ Concatenate scripts, minify, and write to release directory
 -----------------------------------------------------------
 
 ```javascript
-var b = new Buildy();
-
 new Queue('release version')
     .task('files', ['./js/test1.js', './js/test2.js'])
     .task('concat')
     .task('minify')
     .task('write', { name: "./build/test-min.js" })
-    .run(b);
+    .run();
 ```
 
 Make a minified version and a non minified version in parallel
 --------------------------------------------------------------
 
 ```javascript
-var b = new Buildy();
-
 new Queue('build process')
     .task('files', ['./js/test1.js', './js/test2.js'])
     .task('concat')
     .task('fork', {
-        'raw version' : function(b) {
-            this.task('write', { name: './build/test.js' }).run(b);
+        'raw version' : function() {
+            this.task('write', { name: './build/test.js' }).run();
         },
-        'minified version' : function(b) {
-            this.task('minify').task('write', { name: './build/test-min.js' }).run(b);
+        'minified version' : function() {
+            this.task('minify').task('write', { name: './build/test-min.js' }).run();
         }
-    }).run(b);
+    }).run();
 ```
 
 How it works
 ============
 
-- You describe the tasks and task order using the Queue object.
-- The Queue object is given a Buildy object to execute the tasks you describe.
-- Each task is piped to the next one in sequence. The next task in the Queue receives the output of the previous one.
+- Construct a `Queue`. You can have multiple queues and they will execute in parallel.
+- Add a chain of tasks to the `Queue` using the `.task(name, options)` method. The input of each task is the output of
+the previous one. Some tasks, like `files`, generate some output for the next task.
+- At the end of the `Queue` chain, call the `.run()` method. The `Queue` will then be automatically run as soon as node
+executes the queue file.
 
-One Exception to the Syntax
----------------------------
+Flow Control
+------------
 
 The `fork` task splits the queue into sub-queues. These are run in parallel.
 
 Each time you add a fork task, it becomes a new Queue with the name specified ('raw version' 
-in the last example). The new queue gets its own buildy object with the output from the previous task.
-
-The functions you add to 'fork' are a brand new Queue, just the same as writing
-new Queue('queue name'), except that they are instantiated with the state of the parent Queue/Buildy.
+in the last example). The new queue gets a clone of the output before the fork.
 
 
 Task Reference (Incomplete)
@@ -199,3 +195,4 @@ TODO
 ====
 
 * Separate the logger logic from the other modules.
+* Clarify the custom task autoloading method.

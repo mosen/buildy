@@ -1,0 +1,1 @@
+// Test fixture - file included as a task with no task definitions.

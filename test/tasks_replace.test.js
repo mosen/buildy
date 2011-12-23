@@ -1,5 +1,5 @@
 /**
- * Built in task test case - inspect
+ * Built in task test case - replace
  */
 var assert = require('assert'),
     queue = require('../lib/queue'),
@@ -7,5 +7,10 @@ var assert = require('assert'),
 
 
 module.exports = {
-    'test nothing' : function() {}
-}
+    'test replace' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-replace');
+        q.task('files', ['./test/fixtures/test1.js'])
+            .task('replace', { regex: '^.*?(?:logger|Y.log).*?(?:;|\\).*;|(?:\r?\n.*?)*?\\).*;).*;?.*?\r?\n', replace: '', flags: 'mg' });
+        q.run();
+    }
+};

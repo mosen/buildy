@@ -1,10 +1,10 @@
 {
     "name"         : "buildy", 
-    "version"      : "0.0.3",
-    "description"  : "asynchronous build tool with chaining syntax",
+    "version"      : "0.0.5",
+    "description"  : "build tool with chaining syntax",
     "keywords"     : ["build", "builder"],
     "author"       : {
-        "name"  : "Mosen",
+        "name"  : "mosen",
         "url"   : "https://github.com/mosen"
     }, 
     "files"        : ["./lib"], 

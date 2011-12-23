@@ -1,5 +1,5 @@
 /**
- * Built in task test case - files
+ * Built in task test case - inspect
  */
 var assert = require('assert'),
     queue = require('../lib/queue'),
