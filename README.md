@@ -196,3 +196,6 @@ TODO
 
 * Separate the logger logic from the other modules.
 * Clarify the custom task autoloading method.
+* Cover more test cases for each built in task
+* Re-examine task functions that were imported from utils.js, as they may be suboptimal for the new layout.
+* Standardise an option for producing .json formatted reports from tasks that produce that kind of output.
