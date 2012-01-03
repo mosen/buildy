@@ -3,16 +3,82 @@
  */
 var assert = require('assert'),
     queue = require('../lib/queue'),
-    path = require('path');
+    State = require('../lib/state'),
+    path = require('path'),
+    fixtures = {
+        files : ['./test/fixtures/test1.css'],
+        string : '.empty {}',
+        strings : ['.empty {}', 'div { width: 100% }']
+    };
 
 module.exports = {
+
+    // Smoke test
+
     'test csslint (smoke test)' : function(beforeExit, assert) {
         var q = new queue.Queue('test-csslint');
 
-        q.task('files', ['./test/fixtures/test1.css']).task('csslint');
+        q.task('files', fixtures.sourcefiles)
+         .task('concat')
+         .task('csslint');
         q.run();
+    },
+
+    // Test all input types
+
+    'test csslint input files' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-csslint-input-files');
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.FILES, fixtures.files);
+
+        q.task('csslint');
+        q.run();
+
+        var outputState = q._state.get().value;
+
+        assert.equal(outputState.toString(), fixtures.files.toString(), 'assert state contains same filename');
+        assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
+    },
+
+    'test csslint input strings' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-csslint-input-strings');
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRINGS, fixtures.strings);
+
+        q.task('csslint');
+        q.run();
+
+        var outputState = q._state.get().value;
+
+        assert.equal(outputState, fixtures.strings, 'assert state contains same strings');
+        assert.equal(q._state.get().type, State.TYPES.STRINGS, 'assert state is type:strings');
+    },
+
+    'test csslint input string' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-csslint-input-string');
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRING, fixtures.string);
+
+        q.task('csslint');
+        q.run();
+
+        var outputState = q._state.get().value;
+
+        assert.equal(outputState, fixtures.string, 'assert state contains same string');
+        assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string');
+    },
+
+    'test csslint input undefined' : function(beforeExit, assert) {
+
     }
-};
+
+    // test csslint specific functionality
 
 //    // csslint (ASYNC)
 //
@@ -47,3 +113,5 @@ module.exports = {
 //            assert.ok(err);
 //        });
 //    },
+};
+

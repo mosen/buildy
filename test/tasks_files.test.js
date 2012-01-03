@@ -4,58 +4,56 @@
 var assert = require('assert'),
     queue = require('../lib/queue'),
     path = require('path'),
-    State = require('../lib/state');
-
+    State = require('../lib/state'),
+    fixtures = {
+        string : './test/fixtures/test1.js',
+        file : ['./test/fixtures/test1.js'],
+        files : ['./test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'],
+        expected : ['./test.fixtures.test1.js', './test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js']
+    };
 
 module.exports = {
 
     // Smoke test
 
     'test files (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files'),
-            fileFixture = ['./test/fixtures/test1.js'];
+        var q = new queue.Queue('test-files');
 
-        q.task('files', fileFixture);
+        q.task('files', fixtures.file);
         q.run();
 
         var outputState = q._state.get().value;
 
-        assert.equal(outputState.toString(), fileFixture.toString(), 'assert state contains specified filename');
+        assert.equal(outputState.toString(), fixtures.file.toString(), 'assert state contains specified filename');
         assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
     },
 
-    // Test all input types to ensure the main task function doesn't throw an exception
+    // Test all input types
 
     'test files input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-files'),
-            fileFixture = ['./test/fixtures/test1.js'],
-            fileFixtureState = ['./test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'],
-            expectedOutput = ['./test.fixtures.test1.js', './test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'];
+        var q = new queue.Queue('test-files-input-files');
 
         // Mock state
         q._state = new State();
-        q._state.set(State.TYPES.FILES, fileFixtureState);
+        q._state.set(State.TYPES.FILES, fixtures.files);
 
-        q.task('files', fileFixture);
+        q.task('files', fixtures.file);
         q.run();
 
         //console.log(q._state.get().value);
 
-        //assert.deepEqual(q._state.get().value, expectedOutput, 'assert state contains appended file listing');
+        //assert.equal(q._state.get().value, fixtures.expected, 'assert state contains expected combined file listing');
         assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
     },
 
     'test files input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-strings'),
-            fileFixture = ['./test/fixtures/test1.js'],
-            fileFixtureState = ['./test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'],
-            expectedOutput = ['./test.fixtures.test1.js', './test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'];
+        var q = new queue.Queue('test-files-input-strings');
 
         // Mock state
         q._state = new State();
-        q._state.set(State.TYPES.STRINGS, fileFixtureState);
+        q._state.set(State.TYPES.STRINGS, fixtures.files);
 
-        q.task('files', fileFixture);
+        q.task('files', fixtures.file);
         q.run();
 
         //console.log(q._state.get().value);
@@ -65,16 +63,13 @@ module.exports = {
     },
 
     'test files input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-string'),
-            fileFixture = ['./test/fixtures/test1.js'],
-            fileFixtureState = './test/fixtures/test_concat_a.js',
-            expectedOutput = ['./test.fixtures.test1.js', './test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'];
+        var q = new queue.Queue('test-files-input-string');
 
         // Mock state
         q._state = new State();
-        q._state.set(State.TYPES.STRING, fileFixtureState);
+        q._state.set(State.TYPES.STRING, fixtures.string);
 
-        q.task('files', fileFixture);
+        q.task('files', fixtures.files);
         q.run();
 
         //console.log(q._state.get().value);
@@ -84,10 +79,9 @@ module.exports = {
     },
 
     'test files input null with filespec' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-spec'),
-            fileFixture = ['./test/fixtures/test1.js'];
+        var q = new queue.Queue('test-files-input-spec');
 
-        q.task('files', fileFixture);
+        q.task('files', fixtures.file);
         q.run();
 
         //console.log(q._state.get().value);
@@ -95,5 +89,7 @@ module.exports = {
         //assert.deepEqual(q._state.get().value, expectedOutput, 'assert state contains appended file listing');
         assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
     }
+
+    // Test specific functionality
 
 }

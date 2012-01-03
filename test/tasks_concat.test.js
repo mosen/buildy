@@ -4,7 +4,12 @@
 var assert = require('assert'),
     queue = require('../lib/queue'),
     path = require('path'),
-    State = require('../lib/state');
+    State = require('../lib/state'),
+    fixtures = {
+        files : ['./test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'],
+        strings : ['one', 'two'],
+        string : 'three'
+    };
 
 module.exports = {
 
@@ -14,7 +19,7 @@ module.exports = {
         var q = new queue.Queue('test-concat');
         // Mock state
         q._state = new State();
-        q._state.set(State.TYPES.FILES, ['./test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js']);
+        q._state.set(State.TYPES.FILES, fixtures.files);
 
         q.task('concat');
         q.run();
@@ -23,14 +28,14 @@ module.exports = {
         assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string');
     },
 
-    // Test all input types to ensure the main task function doesn't throw an exception
+    // Test all input types
 
     'test concat input files' : function(beforeExit, assert) {
         var q = new queue.Queue('test-concat-files');
 
         // Mock state
         q._state = new State();
-        q._state.set(State.TYPES.FILES, ['./test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js']);
+        q._state.set(State.TYPES.FILES, fixtures.files);
 
         q.task('concat');
         q.run();
@@ -43,14 +48,14 @@ module.exports = {
         var q = new queue.Queue('test-concat-strings');
         // Mock state
         q._state = new State();
-        q._state.set(State.TYPES.STRINGS, ['a', 'b']);
+        q._state.set(State.TYPES.STRINGS, fixtures.strings);
 
         q.task('concat');
         q.run();
 
         //console.log(q._state.get().value);
 
-        assert.equal(q._state.get().value, 'ab', 'assert state contains concatenated string output');
+        assert.equal(q._state.get().value, fixtures.strings.join(''), 'assert state contains concatenated string output');
         assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string');
     },
 
@@ -58,12 +63,12 @@ module.exports = {
         var q = new queue.Queue('test-concat-string');
         // Mock state
         q._state = new State();
-        q._state.set(State.TYPES.STRING, "ab");
+        q._state.set(State.TYPES.STRING, fixtures.string);
 
         q.task('concat');
         q.run();
 
-        assert.equal(q._state.get().value, 'ab', 'assert state contains concatenated string output');
+        assert.equal(q._state.get().value, fixtures.string, 'assert state contains concatenated string output');
         assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string');
     }
 
