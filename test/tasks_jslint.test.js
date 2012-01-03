@@ -8,15 +8,9 @@ var assert = require('assert'),
 
 module.exports = {
     'test jslint' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-jslint'),
-            r = new Registry(),
-            b = new buildy.Buildy();
-
-        r.load(__dirname + '/../lib/tasks');
-
-        b._registry = r;
+        var q = new queue.Queue('test-jslint');
         q.task('files', ['./test/fixtures/test1.js']).task('jslint');
-        q.run(b);
+        q.run();
     }
 }
 
