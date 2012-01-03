@@ -189,6 +189,7 @@ Hello.js - a custom task example
 --------------------------------
 
 hello.js
+
 ```javascript
 var State = require('buildy/lib/state'); // Required to use State.TYPES.*, see switch statement later...
 
@@ -233,6 +234,7 @@ exports.tasks = {
 This task is now registered as the `hello` task. We can use it now as a part of our build process, like so:
 
 testqueue.js
+
 ```javascript
 var Registry = require('buildy/lib/registry'),
     Queue = require('buildy/lib/queue').Queue,
