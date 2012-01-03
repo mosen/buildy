@@ -10,7 +10,7 @@ Main features:
     - tasks and task queues can execute in serial or parallel.
     - extend the built in build tasks with your own tools, or 3rd party tools.
 
-*WARNING: API Still in development, and may change without notice*
+*WARNING: API still in development, and may change without notice until v1.0.0*
 
 Build things
 ============
@@ -94,7 +94,6 @@ The built in tasks are as follows:
 
 Concatenate the input from the previous task.
 
-
 ***
 
 `csslint` (async)
@@ -130,7 +129,7 @@ adding tasks to the child queue.
 
 `inspect`
 
-Log the output of the previous task (and any relevant information).
+Log the output of the previous task.
 
 ***
 
@@ -235,10 +234,15 @@ This task is now registered as the `hello` task. We can use it now as a part of 
 
 testqueue.js
 ```javascript
-var Queue = require('buildy/lib/queue').Queue,
-    testq = new Queue('Test custom task');
+var Registry = require('buildy/lib/registry'),
+    Queue = require('buildy/lib/queue').Queue,
+    customRegistry, testq;
 
-testq._registry.add('/path/to/tasks/hello.js'); // Add the custom task
+customRegistry.add('/path/to/tasks/hello.js'); // Add the custom task OR
+// customRegistry.load('/path/to/tasks/directory'); // Load *.js from this directory
+
+testq = new Queue('Testing queue', { registry: customRegistry }); // Set up a new queue with custom registry.
+
 testq.task('hello'); // The current state will be set to 'hello world'
 testq.write({ dest: './hello.txt' }) // The string will be written out to a file, ./hello.txt
 testq.run(); // Run the task chain, the hello.txt file is created.
