@@ -256,6 +256,8 @@ TODO
 * Separate the logger logic from the other modules.
 * Clarify the custom task autoloading method.
 * Cover more test cases for each built in task
-* Re-examine task functions that were imported from utils.js, as they may be suboptimal for the new layout.
+* Re-examine task functions that were imported from utils.js, as they may be suboptimal for the new layout. (40%)
 * Standardise an option for producing .json formatted reports from tasks that produce that kind of output.
 * Make task registry a public property or method of queue
+* Standardise tasks that operate on a batch of files so that they have a destination directory, destination file prefix and suffix.
+* Establish a defaults system, so that a task option can be defaulted for the entire queue or set of queues.
