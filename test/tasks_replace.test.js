@@ -7,8 +7,9 @@ var assert = require('assert'),
     fixtures = {
         files : ['./test/fixtures/test1.js'],
         string : 'Y.log("a");',
-        strings : ['Y.log("a");', 'console.log("test");'],
+        strings : ['Y.log("a");\n', 'console.log("test");'],
         regex : '^.*?(?:logger|Y.log).*?(?:;|\\).*;|(?:\r?\n.*?)*?\\).*;).*;?.*?\r?\n',
+//        regex : 'Y.log',
         replacement : '',
         flags : 'mg'
     },
@@ -56,7 +57,8 @@ module.exports = {
 
         q.task('replace', { regex: fixtures.regex, replace: fixtures.replacement, flags: fixtures.flags }).run();
 
-        assert.equal(q._state.get().value, fixtures.strings, 'assert state is unchanged');
+        console.log(q._state.get().value[0]);
+        assert.equal(q._state.get().value[0], '', 'assert strings have been replaced with zero length strings');
         assert.equal(q._state.get().type, State.TYPES.STRINGS, 'assert state is type:strings');
     },
 
@@ -75,10 +77,11 @@ module.exports = {
         assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string');
     },
 
-    'test replace input undefined' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-replace-input-undefined');
+    'test replace input undefined fails' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-replace-input-undefined'),
+            didfail = false;
 
-        q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
+        q.on('taskFailed', function(result) { didfail = true; });
 
         // Mock state
         q._state = new State();
@@ -87,6 +90,10 @@ module.exports = {
 
         assert.equal(q._state.get().value, null, 'assert state is unchanged');
         assert.equal(q._state.get().type, State.TYPES.UNDEFINED, 'assert state is type:undefined');
+
+        beforeExit(function() {
+            assert.ok(didfail, 'assert replace undefined causes the task to fail');
+        });
     }
 
     // Test specific functionality
