@@ -3,16 +3,148 @@
  */
 var assert = require('assert'),
     queue = require('../lib/queue'),
-    path = require('path');
+    State = require('../lib/state'),
+    testmethods = require('../lib/tasks/template').testing,
+    fixtures = {
+        files : ['./test/fixtures/test_concat_a.js'],
+        string : 'foo',
+        strings : ['foo', 'bar'],
+        template_file : './test/fixtures/test.handlebars',
+        template_file_array : './test/fixtures/testarray.handlebars',
+        template : '{{content}}'
+    },
+    handleTaskFailure = function(result, assert) {
+        assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
+    };
 
 module.exports = {
-    'test template' : function(beforeExit, assert) {
+
+    // Smoke test
+
+    'test template (smoke test)' : function(beforeExit, assert) {
         var q = new queue.Queue('test-template');
 
-        q.task('files', ['./test/fixtures/test1.js']).task('template', {  });
+        q.task('files', fixtures.files).task('template', { template: fixtures.template })
+         .task('inspect');
         q.run();
+    },
+
+    // Test all input types
+
+    'test template input files' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-template-input-files');
+
+        q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.FILES, fixtures.files);
+
+        q.task('template', { template_file: fixtures.template_file_array }).task('inspect').run();
+
+        beforeExit(function() {
+            assert.equal(q._state.get().value, 'a', 'assert state is template output ' + q._state.get().value);
+            assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string ' + q._state.get().type);
+        });
+    },
+
+    'test template input strings' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-template-input-strings');
+
+        q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRINGS, fixtures.strings);
+
+        q.task('template', { template_file: fixtures.template_file_array }).task('inspect').run();
+
+        beforeExit(function() {
+            assert.equal(q._state.get().value, 'foobar', 'assert state is template output ' + q._state.get().value);
+            assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string ' + q._state.get().type);
+        });
+    },
+
+    'test template input string' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-template-input-string');
+
+        q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRING, fixtures.string);
+
+        q.task('template', { template_file: fixtures.template_file }).task('inspect').run();
+
+        beforeExit(function() {
+            assert.equal(q._state.get().value, fixtures.string, 'assert state is template output ' + q._state.get().value);
+            assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string ' + q._state.get().type);
+        });
+    },
+
+    'test template input undefined' : function(beforeExit, assert) {
+        var q = new queue.Queue('test-template-input-undefined');
+
+        q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
+
+        // Mock state
+        q._state = new State();
+
+        q.task('template', { template_file: fixtures.template_file, template_vars : { content: fixtures.string } }).task('inspect').run();
+
+        beforeExit(function() {
+            assert.equal(q._state.get().value, fixtures.string, 'assert state is template output ' + q._state.get().value);
+            assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string ' + q._state.get().type);
+        });
+    },
+
+    // Test specific functionality
+
+    'test applyHandlebarsTemplate accepts string template' : function(beforeExit, assert) {
+        var templateOutput = '';
+
+        function doneTemplating(err, output) {
+            if (!err) {
+                templateOutput = output;
+            } else {
+                assert.fail('Templating failed: ' + err);
+            }
+        }
+
+        testmethods.applyHandlebarsTemplate({
+            template: fixtures.template,
+            encoding: 'utf8',
+            template_vars: { content: 'replacement content' }
+        }, doneTemplating);
+
+        beforeExit(function() {
+            assert.notEqual(templateOutput, '', 'Templating output has been produced');
+        });
+    },
+
+    'test applyHandlebarsTemplate accepts file template' : function(beforeExit, assert) {
+        var templateOutput = '';
+
+        function doneTemplating(err, output) {
+            if (!err) {
+                templateOutput = output;
+            } else {
+                assert.fail('Templating failed: ' + err);
+            }
+        }
+
+        testmethods.applyHandlebarsTemplate({
+            template_file: fixtures.template_file,
+            encoding: 'utf8',
+            template_vars: { content: 'replacement content' }
+        }, doneTemplating);
+
+        beforeExit(function() {
+            assert.notEqual(templateOutput, '', 'Templating output has been produced');
+        });
     }
-};
+
+    // Older tests to convert
 
 //    'test applyTemplateSync with string' : function(beforeExit, assert) {
 //        var templateVars = {
@@ -75,3 +207,4 @@ module.exports = {
 //            assert.equal(data, testString);
 //        });
 //    },
+};
