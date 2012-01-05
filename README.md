@@ -253,6 +253,7 @@ testq.run(); // Run the task chain, the hello.txt file is created.
 TODO
 ====
 
+* Rewrite and reformat copy, concat, and csslint tasks.
 * Separate the logger logic from the other modules.
 * Clarify the custom task autoloading method.
 * Cover more test cases for each built in task
