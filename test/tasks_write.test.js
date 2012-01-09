@@ -134,7 +134,7 @@ module.exports = {
 //
 //        r.load(__dirname + '/../lib/tasks');
 //
-//        b._registry = r;
+//        b.registry = r;
 //        q.task('files', ['./test/fixtures/test1.js']).task('concat').task('write');
 //        q.run(b);
 //    }
