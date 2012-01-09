@@ -1,9 +1,13 @@
 /**
  * This is a basic example of how you could process files in your web application for deployment.
  *
+ * It creates and runs 3 different queues to show you some of the tasks you COULD use in a build process.
+ *
+ * Each queue is an independent process, and as such will run asynchronously to every other queue.
+ * The same principal applies to children of fork tasks, because when you execute the fork it's essentially 2 new queues.
  */
-var Queue = require('buildy/lib/queue').Queue;
 
+var Queue = require('buildy/lib/queue').Queue; // At a minimum you need to include Queue
 
 /**
  * Build a javascript component.
@@ -13,9 +17,12 @@ var Queue = require('buildy/lib/queue').Queue;
  * - test-debug.js, which includes the original source.
  * - test.js, which includes the source stripped of logger statements.
  * - test-min.js, which has been compressed and obfuscated.
+ *
+ * The jslint task happens asynchronously because it doesn't produce any output, so the concat task may take over
+ * before jslint is finished.
  */
 new Queue('build my component').task('files', ['js/*']) // all of these synchronous
-//    .task('jslint')
+    .task('jslint')
     .task('concat')
     .task('fork', {
         'debug version' : function() {
@@ -40,10 +47,13 @@ new Queue('build my component').task('files', ['js/*']) // all of these synchron
     })
     .run();
 
-var nq = new Queue('build my skins');
-
-// build a skin component
-nq.task('files', ['./css/test1.css', './css/test2.css'])
+/**
+ * Build a skin component.
+ *
+ * This queue is very similar to the one above for processing javascript, but simply uses the css equivalents of most
+ * of those tasks.
+ */
+new Queue('build my skins').task('files', ['./css/test1.css', './css/test2.css'])
     .task('concat')
     .task('csslint')
     .task('fork', {
@@ -55,9 +65,13 @@ nq.task('files', ['./css/test1.css', './css/test2.css'])
         }
     }).run();
 
-//new Queue('copy test').task('copy', {
-//    src : ['css/*'],
-//    dest : 'build/copytest',
-//    excludes : ['js/'],
-//    recursive : true
-//}).run(new Buildy());
+/**
+ * If you just need to deploy certain files into the destination folder you can use the copy task.
+ * It can take an array of sources, with globs mixed in.
+ */
+new Queue('copy raw css').task('copy', {
+    src : ['css/*'],
+    dest : 'build/copytest',
+    excludes : ['js/'],
+    recursive : true
+}).run();
