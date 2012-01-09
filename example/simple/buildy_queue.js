@@ -15,22 +15,23 @@ var Queue = require('buildy/lib/queue').Queue;
  * - test-min.js, which has been compressed and obfuscated.
  */
 new Queue('build my component').task('files', ['js/*']) // all of these synchronous
+//    .task('jslint')
     .task('concat')
-    .task('jslint')
     .task('fork', {
         'debug version' : function() {
              this.task('write', { name: './build/test-debug.js' })
              .run();
         },
         'raw version' : function() {
-             this.task('replace', { regex: '^.*?(?:logger|Y.log).*?(?:;|\\).*;|(?:\r?\n.*?)*?\\).*;).*;?.*?\r?\n', replace: '', flags: 'mg' })
+             this.task('replace', { regex: "^.*?(?:logger|Y.log).*?(?:;|\\).*;|(?:\r?\n.*?)*?\\).*;).*;?.*?\r?\n", replace: '', flags: 'mg' })
                  .task('fork', {
-                     'write raw version' : function(b) {
+                     'write raw version' : function() {
                         this.task('write', { name: './build/test.js' })
                             .run();
                      },
-                     'minified version' : function(b) { 
-                        this.task('minify')
+                     'minified version' : function() {
+                        this.task('jsminify')
+                            .task('inspect')
                             .task('write', { name: './build/test-min.js' })
                             .run();
                      }
