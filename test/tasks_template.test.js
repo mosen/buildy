@@ -4,7 +4,7 @@
 var assert = require('assert'),
     queue = require('../lib/queue'),
     State = require('../lib/state'),
-    testmethods = require('../lib/tasks/template').testing,
+    testmethods = require('../lib/tasks/handlebars').testing,
     fixtures = {
         files : ['./test/fixtures/test_concat_a.js'],
         string : 'foo',
