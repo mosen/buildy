@@ -40,20 +40,20 @@ new Queue('build my component').task('files', ['js/*']) // all of these synchron
     })
     .run();
 
-//var nq = new Queue('build my skins');
-//nq._queue = [];
-//// build a skin component
-//nq.task('files', ['./css/test1.css', './css/test2.css'])
-//    .task('concat')
-//    .task('csslint')
-//    .task('fork', {
-//        'raw css version' : function(b) {
-//            this.task('write', { name: './build/test.css' }).run(b);
-//        },
-//        'minified css version' : function(b) {
-//            this.task('cssminify').task('write', { name: './build/test-min.css' }).run(b);
-//        }
-//    }).run(new Buildy());
+var nq = new Queue('build my skins');
+
+// build a skin component
+nq.task('files', ['./css/test1.css', './css/test2.css'])
+    .task('concat')
+    .task('csslint')
+    .task('fork', {
+        'raw css version' : function() {
+            this.task('write', { name: './build/test.css' }).run();
+        },
+        'minified css version' : function() {
+            this.task('cssminify').task('write', { name: './build/test-min.css' }).run();
+        }
+    }).run();
 
 //new Queue('copy test').task('copy', {
 //    src : ['css/*'],
