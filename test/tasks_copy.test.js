@@ -2,7 +2,7 @@
  * Built in task test case - copy
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     path = require('path'),
     fs = require('fs'),
     State = require('../lib/state'),
@@ -16,7 +16,7 @@ module.exports = {
     // Smoke test
 
     'test copy (smoke test with copy spec)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-copy');
+        var q = new Queue('test-copy');
 
         q.task('copy', { src: fixtures.files, dest: fixtures.destination });
         q.run();
@@ -38,7 +38,7 @@ module.exports = {
     // Test all input types
 
     'test copy input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-copy-files');
+        var q = new Queue('test-copy-files');
 
         // Mock state
         q._state = new State();
@@ -66,7 +66,7 @@ module.exports = {
     },
 
     'test copy input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-copy-strings');
+        var q = new Queue('test-copy-strings');
 
         // Mock state
         q._state = new State();
@@ -92,7 +92,7 @@ module.exports = {
     },
 
     'test copy input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-copy-string');
+        var q = new Queue('test-copy-string');
 
         // Mock state
         q._state = new State();
@@ -119,7 +119,7 @@ module.exports = {
     },
 
     'test copy input undefined' : function(beforeExit, assert) {
-//        var q = new queue.Queue('test-copy-spec');
+//        var q = new Queue('test-copy-spec');
 //
 //        q.task('copy', { dest: fixtures.destination });
 //        q.run();

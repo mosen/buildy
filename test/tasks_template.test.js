@@ -2,7 +2,7 @@
  * Built in task test case - template
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     State = require('../lib/state'),
     testmethods = require('../lib/tasks/handlebars').testing,
     fixtures = {
@@ -22,7 +22,7 @@ module.exports = {
     // Smoke test
 
     'test template (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-template');
+        var q = new Queue('test-template');
 
         q.task('files', fixtures.files).task('template', { template: fixtures.template })
          .task('inspect');
@@ -32,7 +32,7 @@ module.exports = {
     // Test all input types
 
     'test template input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-template-input-files');
+        var q = new Queue('test-template-input-files');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -49,7 +49,7 @@ module.exports = {
     },
 
     'test template input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-template-input-strings');
+        var q = new Queue('test-template-input-strings');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -66,7 +66,7 @@ module.exports = {
     },
 
     'test template input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-template-input-string');
+        var q = new Queue('test-template-input-string');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -83,7 +83,7 @@ module.exports = {
     },
 
     'test template input undefined' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-template-input-undefined');
+        var q = new Queue('test-template-input-undefined');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 

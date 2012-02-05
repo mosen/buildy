@@ -2,7 +2,7 @@
  * Built in task test case - less
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     path = require('path'),
     State = require('../lib/state'),
     fixtures = {
@@ -19,7 +19,7 @@ module.exports = {
     // Smoke test
 
     'test less (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-less');
+        var q = new Queue('test-less');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -33,7 +33,7 @@ module.exports = {
     // Test all input types
 
     'test less input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-less-files');
+        var q = new Queue('test-less-files');
 
         // Mock state
         q._state = new State();
@@ -49,7 +49,7 @@ module.exports = {
     },
 
     'test less input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-less-input-strings');
+        var q = new Queue('test-less-input-strings');
 
         // Mock state
         q._state = new State();
@@ -67,7 +67,7 @@ module.exports = {
     },
 
     'test less input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-less-input-string');
+        var q = new Queue('test-less-input-string');
 
         // Mock state
         q._state = new State();

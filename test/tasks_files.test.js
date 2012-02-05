@@ -2,7 +2,7 @@
  * Built in task test case - files
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     path = require('path'),
     State = require('../lib/state'),
     fixtures = {
@@ -17,7 +17,7 @@ module.exports = {
     // Smoke test
 
     'test files (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files');
+        var q = new Queue('test-files');
 
         q.task('files', fixtures.file);
         q.run();
@@ -31,7 +31,7 @@ module.exports = {
     // Test all input types
 
     'test files input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-files');
+        var q = new Queue('test-files-input-files');
 
         // Mock state
         q._state = new State();
@@ -47,7 +47,7 @@ module.exports = {
     },
 
     'test files input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-strings');
+        var q = new Queue('test-files-input-strings');
 
         // Mock state
         q._state = new State();
@@ -63,7 +63,7 @@ module.exports = {
     },
 
     'test files input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-string');
+        var q = new Queue('test-files-input-string');
 
         // Mock state
         q._state = new State();
@@ -79,7 +79,7 @@ module.exports = {
     },
 
     'test files input null with filespec' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-files-input-spec');
+        var q = new Queue('test-files-input-spec');
 
         q.task('files', fixtures.file);
         q.run();

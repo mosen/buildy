@@ -2,7 +2,7 @@
  * Built in task test case - csslint
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     State = require('../lib/state'),
     path = require('path'),
     fixtures = {
@@ -16,7 +16,7 @@ module.exports = {
     // Smoke test
 
     'test csslint (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-csslint');
+        var q = new Queue('test-csslint');
 
         q.task('files', fixtures.sourcefiles)
          .task('concat')
@@ -27,7 +27,7 @@ module.exports = {
     // Test all input types
 
     'test csslint input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-csslint-input-files');
+        var q = new Queue('test-csslint-input-files');
 
         // Mock state
         q._state = new State();
@@ -43,7 +43,7 @@ module.exports = {
     },
 
     'test csslint input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-csslint-input-strings');
+        var q = new Queue('test-csslint-input-strings');
 
         // Mock state
         q._state = new State();
@@ -59,7 +59,7 @@ module.exports = {
     },
 
     'test csslint input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-csslint-input-string');
+        var q = new Queue('test-csslint-input-string');
 
         // Mock state
         q._state = new State();

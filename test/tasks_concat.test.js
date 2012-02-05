@@ -2,7 +2,7 @@
  * Built in task test case - concat
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     path = require('path'),
     State = require('../lib/state'),
     fixtures = {
@@ -16,7 +16,7 @@ module.exports = {
     // Smoke test
 
     'test concat (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-concat');
+        var q = new Queue('test-concat');
         // Mock state
         q._state = new State();
         q._state.set(State.TYPES.FILES, fixtures.files);
@@ -31,7 +31,7 @@ module.exports = {
     // Test all input types
 
     'test concat input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-concat-files');
+        var q = new Queue('test-concat-files');
 
         // Mock state
         q._state = new State();
@@ -45,7 +45,7 @@ module.exports = {
     },
 
     'test concat input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-concat-strings');
+        var q = new Queue('test-concat-strings');
         // Mock state
         q._state = new State();
         q._state.set(State.TYPES.STRINGS, fixtures.strings);
@@ -60,7 +60,7 @@ module.exports = {
     },
 
     'test concat input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-concat-string');
+        var q = new Queue('test-concat-string');
         // Mock state
         q._state = new State();
         q._state.set(State.TYPES.STRING, fixtures.string);

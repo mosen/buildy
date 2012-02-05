@@ -2,7 +2,7 @@
  * Built in task test case - write
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     State = require('../lib/state'),
     fs = require('fs'),
     path = require('path'),
@@ -28,7 +28,7 @@ module.exports = {
     // Smoke test
 
     'test write (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-write');
+        var q = new Queue('test-write');
 
         q.task('files', fixtures.files)
          .task('concat')
@@ -44,7 +44,7 @@ module.exports = {
     // Test all input types
 
     'test write input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-write-input-files');
+        var q = new Queue('test-write-input-files');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -64,7 +64,7 @@ module.exports = {
     },
 
     'test write input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-write-input-strings');
+        var q = new Queue('test-write-input-strings');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -84,7 +84,7 @@ module.exports = {
     },
 
     'test write input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-write-input-string');
+        var q = new Queue('test-write-input-string');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -104,7 +104,7 @@ module.exports = {
     },
 
     'test write input undefined' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-write-input-undefined');
+        var q = new Queue('test-write-input-undefined');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -128,7 +128,7 @@ module.exports = {
     // Old Tests
 
     //    'test write' : function(beforeExit, assert) {
-//        var q = new queue.Queue('test-write'),
+//        var q = new Queue('test-write'),
 //            r = new Registry(),
 //            b = new buildy.Buildy();
 //

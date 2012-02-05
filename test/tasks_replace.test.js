@@ -2,7 +2,7 @@
  * Built in task test case - replace
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     State = require('../lib/state'),
     fixtures = {
         files : ['./test/fixtures/test1.js'],
@@ -23,7 +23,7 @@ module.exports = {
     // Smoke test
 
     'test replace (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-replace');
+        var q = new Queue('test-replace');
         q.task('files', ['./test/fixtures/test1.js'])
             .task('replace', { regex: fixtures.regex, replace: fixtures.replacement, flags: fixtures.flags });
         q.run();
@@ -32,7 +32,7 @@ module.exports = {
     // Test all input types
 
     'test replace input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-replace-input-files');
+        var q = new Queue('test-replace-input-files');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -47,7 +47,7 @@ module.exports = {
     },
 
     'test replace input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-replace-input-strings');
+        var q = new Queue('test-replace-input-strings');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -63,7 +63,7 @@ module.exports = {
     },
 
     'test replace input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-replace-input-string');
+        var q = new Queue('test-replace-input-string');
 
         q.on('taskFailed', function(result) { handleTaskFailure(result, assert); });
 
@@ -78,7 +78,7 @@ module.exports = {
     },
 
     'test replace input undefined fails' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-replace-input-undefined'),
+        var q = new Queue('test-replace-input-undefined'),
             didfail = false;
 
         q.on('taskFailed', function(result) { didfail = true; });

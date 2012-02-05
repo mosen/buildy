@@ -2,7 +2,7 @@
  * Built in task test case - jslint
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     path = require('path'),
     State = require('../lib/state'),
     fixtures = {
@@ -17,7 +17,7 @@ module.exports = {
     // Smoke test
 
     'test jslint (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-jslint');
+        var q = new Queue('test-jslint');
 
         q.task('files', fixtures.files).task('jslint');
         q.run();
@@ -26,7 +26,7 @@ module.exports = {
     // Test all input types
 
     'test jslint input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-jslint-input-files');
+        var q = new Queue('test-jslint-input-files');
 
         // Mock state
         q._state = new State();
@@ -39,7 +39,7 @@ module.exports = {
     },
 
     'test jslint input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-jslint-input-strings');
+        var q = new Queue('test-jslint-input-strings');
 
         // Mock state
         q._state = new State();
@@ -52,7 +52,7 @@ module.exports = {
     },
 
     'test jslint input string' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-jslint-input-string');
+        var q = new Queue('test-jslint-input-string');
 
         // Mock state
         q._state = new State();
@@ -65,7 +65,7 @@ module.exports = {
     },
 
     'test jslint input undefined' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-jslint-input-string');
+        var q = new Queue('test-jslint-input-string');
 
         // Mock state
         q._state = new State();

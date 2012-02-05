@@ -2,7 +2,7 @@
  * Built in task test case - inspect
  */
 var assert = require('assert'),
-    queue = require('../lib/queue'),
+    Queue = require('../lib/queue'),
     path = require('path'),
     State = require('../lib/state'),
     fixtures = {
@@ -16,7 +16,7 @@ module.exports = {
     // Smoke test
 
     'test inspect (smoke test)' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-inspect');
+        var q = new Queue('test-inspect');
 
         q._state = new State();
         q._state.set(State.TYPES.STRING, fixtures.string);
@@ -32,7 +32,7 @@ module.exports = {
     // Test all input types
 
     'test inspect input files' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-inspect-input-files');
+        var q = new Queue('test-inspect-input-files');
 
         // Mock state
         q._state = new State();
@@ -45,7 +45,7 @@ module.exports = {
     },
 
     'test inspect input strings' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-inspect-input-strings');
+        var q = new Queue('test-inspect-input-strings');
 
         // Mock state
         q._state = new State();
@@ -58,7 +58,7 @@ module.exports = {
     },
 
     'test inspect input undefined' : function(beforeExit, assert) {
-        var q = new queue.Queue('test-inspect-input-strings');
+        var q = new Queue('test-inspect-input-strings');
 
         // Mock state
         q._state = new State();
