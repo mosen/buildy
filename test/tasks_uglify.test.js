@@ -16,35 +16,35 @@ module.exports = {
 
     // Smoke test
 
-//    'test jsminify (smoke test)' : function(beforeExit, assert) {
-//        var q = new Queue('test-jsminify');
-//
-//        q.on('taskFailed', function(result) {
-//            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
-//        });
-//
-//        q.task('files', fixtures.files).task('jsminify');
-//        q.run();
-//    },
-//
-//    // Test all input types
-//
-//    'test jsminify input files' : function(beforeExit, assert) {
-//        var q = new Queue('test-jsminify-input-files');
-//
-//        q.on('taskFailed', function(result) {
-//            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
-//        });
-//
-//        // Mock state
-//        q._state = new State();
-//        q._state.set(State.TYPES.FILES, fixtures.files);
-//
-//        q.task('jsminify').run();
-//
-//        assert.equal(q._state.get().value, fixtures.files, 'assert state is unchanged');
-//        assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
-//    },
+    'test jsminify (smoke test)' : function(beforeExit, assert) {
+        var q = new Queue('test-jsminify');
+
+        q.on('taskFailed', function(result) {
+            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
+        });
+
+        q.task('files', fixtures.files).task('jsminify');
+        q.run();
+    },
+
+    // Test all input types
+
+    'test jsminify input files' : function(beforeExit, assert) {
+        var q = new Queue('test-jsminify-input-files');
+
+        q.on('taskFailed', function(result) {
+            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
+        });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.FILES, fixtures.files);
+
+        q.task('jsminify').run();
+
+        assert.equal(q._state.get().value, fixtures.files, 'assert state is unchanged');
+        assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
+    },
 
     'test jsminify input strings' : function(beforeExit, assert) {
         var q = new Queue('test-jsminify-input-strings');
@@ -61,43 +61,43 @@ module.exports = {
 
         //assert.equal(q._state.get().value, fixtures.strings, 'assert state is unchanged');
         assert.equal(q._state.get().type, State.TYPES.STRINGS, 'assert state is type:strings');
+    },
+
+    'test jsminify input string' : function(beforeExit, assert) {
+        var q = new Queue('test-jsminify-input-string');
+
+        q.on('taskFailed', function(result) {
+            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
+        });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRING, fixtures.string);
+
+        q.task('jsminify').run();
+
+        //assert.equal(q._state.get().value, fixtures.string, 'assert state is unchanged');
+        assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string');
+    },
+
+    'test jsminify input undefined' : function(beforeExit, assert) {
+        var q = new Queue('test-jsminify-input-undefined'),
+            taskFailed = false;
+
+        q.on('taskFailed', function(result) {
+            taskFailed = true;
+        });
+
+        // Mock state
+        q._state = new State();
+
+        q.task('jsminify').run();
+
+        beforeExit(function() {
+            assert.equal(q._state.get().type, State.TYPES.UNDEFINED, 'assert state is type:undefined');
+            assert.ok(taskFailed, 'assert jsminify fails with undefined input');
+        });
     }
-
-//    'test jsminify input string' : function(beforeExit, assert) {
-//        var q = new Queue('test-jsminify-input-string');
-//
-//        q.on('taskFailed', function(result) {
-//            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
-//        });
-//
-//        // Mock state
-//        q._state = new State();
-//        q._state.set(State.TYPES.STRING, fixtures.string);
-//
-//        q.task('jsminify').run();
-//
-//        //assert.equal(q._state.get().value, fixtures.string, 'assert state is unchanged');
-//        assert.equal(q._state.get().type, State.TYPES.STRING, 'assert state is type:string');
-//    },
-
-//    'test jsminify input undefined' : function(beforeExit, assert) {
-//        var q = new Queue('test-jsminify-input-undefined'),
-//            taskFailed = false;
-//
-//        q.on('taskFailed', function(result) {
-//            taskFailed = true;
-//        });
-//
-//        // Mock state
-//        q._state = new State();
-//
-//        q.task('jsminify').run();
-//
-//        beforeExit(function() {
-//            assert.equal(q._state.get().type, State.TYPES.UNDEFINED, 'assert state is type:undefined');
-//            assert.ok(taskFailed, 'assert jsminify fails with undefined input');
-//        });
-//    }
 
     // Test specific functionality
 
