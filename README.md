@@ -262,3 +262,8 @@ TODO
 * Rename 'promise' to 'status' object that is passed to task, the same object can be used to send back log messages to
 the controlling queue.
 * Pass logger reference to each task so that the 'status' object does not perform a dual role.
+* Files that are cast into strings should retain filename throughout the process.
+
+non piped file output should take these options:
+{ dir: '/output/directory', prefix: 'prepended-to-filename', suffix: 'appended-to-filename' }
+this is to handle a multiple-string or multiple-file operation
