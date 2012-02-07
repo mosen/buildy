@@ -253,16 +253,16 @@ testq.run(); // Run the task chain, the hello.txt file is created.
 TODO
 ====
 
-* Separate the logger logic from the other modules.
+* Separate task logging from the status object.
 * Clarify the custom task autoloading method.
-* Cover more test cases for each built in task
-* Standardise an option for producing .json formatted reports from tasks that produce that kind of output.
-* Standardise tasks that operate on a batch of files so that they have a destination directory, destination file prefix and suffix.
+* 100% test coverage of each task.
+* Standardise an option for producing .json formatted reports from tasks that produce that kind of output. (probably use
+winston metadata/custom transports).
+* Determine a strategy for dealing with tasks that operate on a batch of files where the output is also files. Use
+destination dir, file prefix, file suffix options.
 * Establish a defaults system, so that a task option can be defaulted for the entire queue or set of queues.
-* Rename 'promise' to 'status' object that is passed to task, the same object can be used to send back log messages to
-the controlling queue.
-* Pass logger reference to each task so that the 'status' object does not perform a dual role.
-* Files that are cast into strings should retain filename throughout the process.
+* Files that are cast into strings should retain filename throughout the process, so that they may be written out based upon the original name.
+* Dont use an inspect task in the unit tests, the unit test might expose a problem with inspect instead of the subject.
 
 non piped file output should take these options:
 { dir: '/output/directory', prefix: 'prepended-to-filename', suffix: 'appended-to-filename' }

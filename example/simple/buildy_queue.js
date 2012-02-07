@@ -7,7 +7,7 @@
  * The same principal applies to children of fork tasks, because when you execute the fork it's essentially 2 new queues.
  */
 
-var Queue = require('buildy/lib/queue').Queue; // At a minimum you need to include Queue
+var Queue = require('buildy/lib/queue'); // At a minimum you need to include Queue
 
 /**
  * Build a javascript component.

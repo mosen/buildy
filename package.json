@@ -21,11 +21,11 @@
     "dependencies" : {
         "mkdirp"     : "0.0.x",
         "jslint"     : "0.1.x",
-        "csslint"    : "0.4.x",
-        "less"       : "1.1.x",
-        "uglify-js"  : "1.0.x",
+        "csslint"    : "0.9.x",
+        "less"       : "1.2.x",
+        "uglify-js"  : "1.2.x",
         "handlebars" : "1.0.x",
-        "winston"    : "0.3.x"
+        "winston"    : "0.5.x"
     },
     "devDependencies" : {
         "expresso" : "0.9.x"
