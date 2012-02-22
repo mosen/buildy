@@ -1,17 +1,16 @@
 {
     "name"         : "buildy", 
     "version"      : "0.0.5",
-    "description"  : "build tool with chaining syntax",
+    "description"  : "A build framework with chaining syntax",
     "keywords"     : ["build", "builder"],
     "author"       : {
         "name"  : "mosen",
         "url"   : "https://github.com/mosen"
     }, 
-    "files"        : ["./lib"], 
+    "files"        : ["./lib", "./example"],
     "main"         : "./lib/buildy.js",
     "directories"  : {
         "lib"     : "./lib",
-        "bin"     : "./bin",
         "example" : "./example"
     },
     "repository"   : {
@@ -30,5 +29,6 @@
     "devDependencies" : {
         "expresso" : "0.9.x"
     },
+    "preferGlobal" : true,
     "private"      : true
 }
