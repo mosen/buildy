@@ -26,7 +26,8 @@
         "winston"    : "0.5.x"
     },
     "devDependencies" : {
-        "expresso" : "0.9.x"
+        "expresso" : "0.9.x",
+        "temp" : "0.4.x"
     },
     "preferGlobal" : true,
     "private"      : true

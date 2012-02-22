@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    Queue = require('../lib/buildy/queue'),
+    Queue = require('../lib/buildy').Queue,
     fs = require('fs'),
     path = require('path');
 
