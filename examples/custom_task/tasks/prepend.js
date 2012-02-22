@@ -27,7 +27,7 @@
  */
 
 // Required to access pseudo-constants State.TYPES.*
-var State = require('buildy/lib/state');
+var State = require('buildy').State;
 
 function prependTask(params, status) {
     switch (this._state.get().type) {

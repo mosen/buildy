@@ -2,8 +2,8 @@
  * Built in task test case - csslint
  */
 var assert = require('assert'),
-    Queue = require('../lib/queue'),
-    State = require('../lib/state'),
+    Queue = require('../lib/buildy/queue'),
+    State = require('../lib/buildy/state'),
     path = require('path'),
     fixtures = {
         files : ['./test/fixtures/test1.css'],

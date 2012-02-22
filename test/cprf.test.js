@@ -1,6 +1,6 @@
 // Test the Cprf module
 var assert = require('assert'),
-    cprf = require('../lib/cprf'),
+    cprf = require('../lib/buildy/cprf'),
     path = require('path'),
     fs   = require('fs');
 

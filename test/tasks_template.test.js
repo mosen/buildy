@@ -2,9 +2,9 @@
  * Built in task test case - template
  */
 var assert = require('assert'),
-    Queue = require('../lib/queue'),
-    State = require('../lib/state'),
-    testmethods = require('../lib/tasks/handlebars').testing,
+    Queue = require('../lib/buildy/queue'),
+    State = require('../lib/buildy/state'),
+    testmethods = require('../lib/buildy/tasks/handlebars').testing,
     fixtures = {
         files : ['./test/fixtures/test_concat_a.js'],
         string : 'foo',

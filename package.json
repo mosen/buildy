@@ -6,12 +6,11 @@
     "author"       : {
         "name"  : "mosen",
         "url"   : "https://github.com/mosen"
-    }, 
-    "files"        : ["./lib", "./example"],
-    "main"         : "./lib/buildy.js",
+    },
+    "main"         : "./lib/buildy",
     "directories"  : {
-        "lib"     : "./lib",
-        "example" : "./example"
+        "lib"     : "lib",
+        "example" : "example"
     },
     "repository"   : {
         "type" : "git", 

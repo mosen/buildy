@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    Registry = require('../lib/registry'),
+    Registry = require('../lib/buildy/registry'),
     util = require('util');
 
 module.exports = {
@@ -22,14 +22,14 @@ module.exports = {
 
     'test load with single directory' : function(beforeExit, assert) {
         var r = new Registry();
-        r.load(__dirname + '/../lib/tasks');
+        r.load(__dirname + '/../lib/buildy/tasks');
 
         assert.notEqual(r._tasks.concat, undefined, "tasks list contains the concat task.");
     },
 
     'test load with single filename' : function(beforeExit, assert) {
         var r = new Registry();
-        r.load(__dirname + '/../lib/tasks/concat.js');
+        r.load(__dirname + '/../lib/buildy/tasks/concat.js');
     },
 
     'test loading non-existent directory of tasks fails with warning' : function(beforeExit, assert) {
@@ -46,7 +46,7 @@ module.exports = {
 
     'test retrieving concat task' : function(beforeExit, assert) {
         var r = new Registry();
-        r.load(__dirname + '/../lib/tasks');
+        r.load(__dirname + '/../lib/buildy/tasks');
 
         var c = r.task('concat');
         assert.equal(typeof c, "function");

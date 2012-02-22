@@ -2,9 +2,9 @@
  * Built in task test case - inspect
  */
 var assert = require('assert'),
-    Queue = require('../lib/queue'),
+    Queue = require('../lib/buildy/queue'),
     path = require('path'),
-    State = require('../lib/state'),
+    State = require('../lib/buildy/state'),
     fixtures = {
         string : 'Test inspect task string',
         strings : [ 'Test inspect string 1', 'Test inspect string 2' ],

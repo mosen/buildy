@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    Queue = require('../lib/queue'),
+    Queue = require('../lib/buildy/queue'),
     fs = require('fs'),
     path = require('path');
 

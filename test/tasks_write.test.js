@@ -2,8 +2,8 @@
  * Built in task test case - write
  */
 var assert = require('assert'),
-    Queue = require('../lib/queue'),
-    State = require('../lib/state'),
+    Queue = require('../lib/buildy/queue'),
+    State = require('../lib/buildy/state'),
     fs = require('fs'),
     path = require('path'),
     fixtures = {
@@ -132,7 +132,7 @@ module.exports = {
 //            r = new Registry(),
 //            b = new buildy.Buildy();
 //
-//        r.load(__dirname + '/../lib/tasks');
+//        r.load(__dirname + '/../lib/buildy/tasks');
 //
 //        b.registry = r;
 //        q.task('files', ['./test/fixtures/test1.js']).task('concat').task('write');

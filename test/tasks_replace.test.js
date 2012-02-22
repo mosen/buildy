@@ -2,8 +2,8 @@
  * Built in task test case - replace
  */
 var assert = require('assert'),
-    Queue = require('../lib/queue'),
-    State = require('../lib/state'),
+    Queue = require('../lib/buildy/queue'),
+    State = require('../lib/buildy/state'),
     fixtures = {
         files : ['./test/fixtures/test1.js'],
         string : 'Y.log("a");',

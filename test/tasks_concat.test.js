@@ -2,9 +2,9 @@
  * Built in task test case - concat
  */
 var assert = require('assert'),
-    Queue = require('../lib/queue'),
+    Queue = require('../lib/buildy/queue'),
     path = require('path'),
-    State = require('../lib/state'),
+    State = require('../lib/buildy/state'),
     fixtures = {
         files : ['./test/fixtures/test_concat_a.js', './test/fixtures/test_concat_b.js'],
         strings : ['one', 'two'],
