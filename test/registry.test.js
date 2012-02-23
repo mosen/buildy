@@ -15,7 +15,9 @@ module.exports = {
 
     'test adding a task directly with invalid spec fails with a warning' : function(beforeExit, assert) {
         var r = new Registry();
-        r.add('task', {});
+        assert.throws(function() {
+            r.add('task', {});
+        }, TypeError, 'exception thrown when attempting to add an invalid task specification');
     },
 
     // Registry.load
