@@ -22,7 +22,7 @@ Concatenate scripts, minify, and write to release directory
 new Queue('release version')
     .task('files', ['./js/test1.js', './js/test2.js'])
     .task('concat')
-    .task('minify')
+    .task('jsminify')
     .task('write', { name: './build/test-min.js' })
     .run();
 ```
@@ -39,7 +39,7 @@ new Queue('build process')
             this.task('write', { name: './build/test.js' }).run();
         },
         'minified version' : function() {
-            this.task('minify').task('write', { name: './build/test-min.js' }).run();
+            this.task('jsminify').task('write', { name: './build/test-min.js' }).run();
         }
     }).run();
 ```
@@ -54,7 +54,7 @@ Write a raw version to the release directory and lint the stylesheets simultaneo
 new Queue('release version')
     .task('files', ['./js/test1.js', './js/test2.js'])
     .task('concat')
-    .task('minify')
+    .task('jsminify')
     .task('write', { name: './build/test-min.js' })
     .run();
 
@@ -139,7 +139,7 @@ JSLint the input.
 
 ***
 
-`minify`
+`jsminify`
 
 Minify the input using uglify-js.
 
@@ -250,10 +250,19 @@ testq.write({ dest: './hello.txt' }) // The string will be written out to a file
 testq.run(); // Run the task chain, the hello.txt file is created.
 ```
 
+Queue
+=====
+
+The following options can be supplied as the second parameter, an object containing any of these properties:
+
+* `skip : ['task name to skip', ...]` Basic task skipping, allows you to skip a particular task by its task name.
+Execution will continue on the next task in the queue.
+* `taskDefaults : { 'task name' : { ... } }` Object containing task names with their respective default parameters.
+
+
 TODO
 ====
 
-* Separate task logging from the status object.
 * Clarify the custom task autoloading method.
 * 100% test coverage of each task.
 * Standardise an option for producing .json formatted reports from tasks that produce that kind of output. (probably use

@@ -101,7 +101,60 @@ module.exports = {
         var q = new Queue('queueposition-test');
         q.next();
         q.next();
-    }
+    },
 
     // TODO: task complete/failed handlers
+
+    'test skipped task type is actually skipped' : function(beforeExit, assert) {
+        var taskSkipped = true;
+        var q = new Queue('queueskip-test', {
+            skip: ['test']
+        });
+
+        q.registry.add('test', {
+            callback : function() {
+                taskSkipped = false;
+            }
+        });
+
+        q.task('test').run();
+
+        assert.ok(taskSkipped, "test task was not called, it was skipped.");
+    },
+
+    'test skipped task type emits taskSkipped' : function(beforeExit, assert) {
+        var skippedEmitted = false;
+        var q = new Queue('queueskip-test', {
+            skip: ['test']
+        });
+
+        q.registry.add('test', {
+            callback : function() {}
+        });
+
+        q.on('taskSkipped', function() {
+            skippedEmitted = true;
+        });
+
+        q.task('test').run();
+
+        assert.ok(skippedEmitted, "queue emitted taskSkipped upon skipping a task.");
+    },
+
+    'test default parameters are supplied to test task' : function(beforeExit, assert) {
+        var testParams = { test: 'test' };
+        var q = new Queue('queueskip-test', {
+            taskDefaults : { 'test' : testParams }
+        });
+
+        q.registry.add('test', {
+            callback : function(params) {
+                assert.equal(params.test, testParams.test, "Default parameter 'test' is passed to custom task");
+            }
+        });
+
+        q.task('test').run();
+    }
+
+    // TODO: taskDefaults tests
 }

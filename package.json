@@ -29,6 +29,5 @@
         "expresso" : "0.9.x",
         "temp" : "0.4.x"
     },
-    "preferGlobal" : true,
-    "private"      : true
+    "preferGlobal" : true
 }
