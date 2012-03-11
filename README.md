@@ -257,7 +257,7 @@ The following options can be supplied as the second parameter, an object contain
 
 * `skip : ['task name to skip', ...]` Basic task skipping, allows you to skip a particular task by its task name.
 Execution will continue on the next task in the queue.
-* `taskDefaults : { 'task name' : { ... } }` Object containing task names with their respective default parameters.
+* `defaults : { 'task name' : { ... } }` Object containing task names with their respective default parameters.
 
 
 TODO
