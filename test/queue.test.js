@@ -144,7 +144,7 @@ module.exports = {
     'test default parameters are supplied to test task' : function(beforeExit, assert) {
         var testParams = { test: 'test' };
         var q = new Queue('queueskip-test', {
-            taskDefaults : { 'test' : testParams }
+            defaults : { 'test' : testParams }
         });
 
         q.registry.add('test', {

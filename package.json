@@ -1,6 +1,6 @@
 {
     "name"         : "buildy", 
-    "version"      : "0.0.5",
+    "version"      : "0.0.6",
     "description"  : "A build framework with chaining syntax",
     "keywords"     : ["build", "builder"],
     "author"       : {
