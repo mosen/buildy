@@ -4,6 +4,12 @@ var assert = require('assert'),
     State = require('../lib/buildy/state'),
     Queue = require('../lib/buildy').Queue,
 
+    fixtures = {
+        files : ['./test/fixtures/test1.js'],
+        string : "function a() {}\nvar x = 1;",
+        strings : ['function a() {}', 'var x = 1;']
+    },
+
     fs = require('fs'),
     path = require('path');
 
@@ -141,6 +147,31 @@ module.exports = {
         assert.ok(skippedEmitted, "queue emitted taskSkipped upon skipping a task.");
     },
 
+    'test skip jsminify task' : function(beforeExit, assert) {
+        var q = new Queue('test-skip-jsminify', {
+            skip: ['jsminify']
+        });
+
+        q.on('taskFailed', function(result) {
+            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
+        });
+
+        q.on('taskSkipped', function() {
+            console.log('skipped jsminify task');
+        });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRING, fixtures.string);
+
+        q.task('jsminify');
+        q.run();
+
+        beforeExit(function() {
+            assert.equal(fixtures.string, q._state.get().value, 'code was not altered by jsminify');
+        });
+    },
+
     'test default parameters are supplied to test task' : function(beforeExit, assert) {
         var testParams = { test: 'test' };
         var q = new Queue('queueskip-test', {
@@ -155,6 +186,4 @@ module.exports = {
 
         q.task('test').run();
     }
-
-    // TODO: taskDefaults tests
 }
