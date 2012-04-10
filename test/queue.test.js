@@ -164,10 +164,13 @@ module.exports = {
         q._state = new State();
         q._state.set(State.TYPES.STRING, fixtures.string);
 
+
         q.task('jsminify');
+        q.task('inspect');
         q.run();
 
         beforeExit(function() {
+            console.log(q._state.get().value);
             assert.equal(fixtures.string, q._state.get().value, 'code was not altered by jsminify');
         });
     },
