@@ -175,6 +175,43 @@ module.exports = {
         });
     },
 
+    'test regression where forked tasks are not skipped' : function(beforeExit, assert) {
+        // Make sure that when the Queue object forks, the children inherit the skip list.
+        var skip_list = ['jsminify'];
+
+        var q = new Queue('test-regress-skipforks', {
+            skip: skip_list
+        });
+
+        q.on('taskFailed', function(result) {
+            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
+        });
+
+        q.on('taskSkipped', function() {
+            console.log('skipped task');
+        });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRING, fixtures.string);
+
+        q.task('fork', {
+            'test fork inherits skip list' : function() {
+                assert.equal(skip_list, this._skip, 'forked queue contains a skip list');
+
+                this.task('jsminify');
+                this.task('inspect').run();
+            }
+        });
+        q.run();
+
+        beforeExit(function() {
+            console.log(q._state.get().value);
+            assert.equal(fixtures.string, q._state.get().value, 'code was not altered by jsminify');
+        });
+
+    },
+
     'test default parameters are supplied to test task' : function(beforeExit, assert) {
         var testParams = { test: 'test' };
         var q = new Queue('queueskip-test', {
