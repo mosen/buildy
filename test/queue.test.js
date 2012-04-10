@@ -7,7 +7,8 @@ var assert = require('assert'),
     fixtures = {
         files : ['./test/fixtures/test1.js'],
         string : "function a() {}\nvar x = 1;",
-        strings : ['function a() {}', 'var x = 1;']
+        strings : ['function a() {}', 'var x = 1;'],
+        bitwise : "var x = 1 & 1;"
     },
 
     fs = require('fs'),
@@ -225,5 +226,36 @@ module.exports = {
         });
 
         q.task('test').run();
+    },
+
+    'test regression where forked tasks do not inherit defaults' : function(beforeExit, assert) {
+        // Make sure that the jslint in the forked queue inherits the defaults for the parent queue.
+        var testDefaults = {
+            "jslint" : {
+                "bitwise" : false // Should cause bitwise operations not to raise an error.
+            }
+        };
+
+        var q = new Queue('test-regress-defaults', {
+            defaults: testDefaults
+        });
+
+        q.on('taskFailed', function(result) {
+            assert.fail('A task has failed in the test queue: ' + result.queue + ', result: ' + result.result);
+        });
+
+        // Mock state
+        q._state = new State();
+        q._state.set(State.TYPES.STRING, fixtures.bitwise);
+
+        q.task('fork', {
+            'test fork inherits defaults for jslint' : function() {
+                assert.equal(testDefaults, this._defaults, 'forked queue contains inherited defaults.');
+
+                this.task('jslint');
+                this.task('inspect').run();
+            }
+        });
+        q.run();
     }
 }
