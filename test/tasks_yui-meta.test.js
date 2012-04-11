@@ -31,7 +31,7 @@ module.exports = {
         q._state = new State();
         q._state.set(State.TYPES.STRING, fixtures.string_yui);
 
-        q.task('yui-meta').run();
+        q.task('yui-meta').task('inspect').run();
     }
 
 }
