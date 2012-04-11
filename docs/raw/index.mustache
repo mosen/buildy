@@ -1,0 +1,138 @@
+<div class="intro">
+<p>
+Buildy is a build system for web/javascript/node.js projects.
+It acts like a sequence of 'piped' commands.
+</p>
+</div>
+
+
+<h2>Installation</h2>
+
+<p>
+Install Buildy using npm:
+</p>
+
+```terminal
+$ npm install buildy -g
+```
+
+<p>
+Or clone the <a href="https://github.com/mosen/buildy/">GitHub repo</a> to install the latest development version:
+</p>
+
+```terminal
+$ git clone git://github.com/mosen/buildy.git
+$ cd buildy && npm install -g
+```
+
+<h2>Overview</h2>
+
+<p>
+Buildy exports several different objects which you can use with nodejs to create your own build script.
+</p>
+
+<p>
+The main object you will be working with is the Queue object.
+</p>
+
+<h3>Queue</h3>
+
+<p>
+Each queue object is a description of a set of tasks that you want to perform as a part of your build process. Most of
+the time these tasks are executed one after another and they depend on the previous task.
+</p>
+
+<h4>Sample of constructing a queue of tasks sequentially</h4>
+
+```
+var Queue = require('buildy').Queue;
+
+new Queue('release version')
+    .task('files', ['./js/test1.js', './js/test2.js'])
+    .task('concat')
+    .task('jsminify')
+    .task('write', { name: './build/test-min.js' })
+    .run();
+```
+
+<p>
+In this example, the Queue is constructed with the name 'release version'. The name of the queue is printed in any logs
+to give an indication of which queue is executing a task, and what the task result is.
+</p>
+
+<p>
+Tasks are added to the queue using the `task` method. The first parameter is the name of a valid task (either one that
+ships with buildy, or a custom task that you added). The second parameter will be the task options, which varies
+depending on what kind of task you are adding to the Queue.
+</p>
+
+<h3>Queue in parallel</h3>
+
+<p>
+There may be tasks in your build process that can happen independently of other tasks, for example:
+you might be able to do a final run of your test suites, or produce documentation as a part of the script. You might
+just have several individual components that should be built at the same time.
+</p>
+
+<p>There are two different ways to deal with this: forks and multiple queues</p>
+
+<h4>forks</h4>
+
+<p>When you specify a fork task in a queue, you are actually creating a set of new queue objects that inherit their
+state and configuration from the current Queue object. This allows you to diverge when you want to run several different
+build tasks acting on the same output.</p>
+
+<h5>Sample of the fork task</h5>
+
+```
+var Queue = require('buildy').Queue;
+
+new Queue('fork example')
+    .task('files', ['./js/test1.js', './js/test2.js'])
+    .task('concat')
+    .task('fork', {
+        'first child queue' : function() {
+            this.task('write', { name: './build/queue-a.js' }).run();
+        },
+        'second child queue' : function() {
+            this.task('write', { name: './build/queue-b.js' }).run();
+        }
+    }).run();
+```
+
+<p>In this example we take the concatenated contents of test1.js and test2.js, and write it to two different files
+(not very useful, i know). The point is that in the example, the writing of each file happens completely independently
+</p>
+
+<h4>creating multiple queues</h4>
+
+<p>If your build process has multiple different types of tasks to perform which are not in any way related, consider
+making multiple Queue's for this purpose</p>
+
+<h5>Sample of multiple queues</h5>
+
+```
+var Queue = require('buildy').Queue;
+
+new Queue('scripts')
+    .task('files', ['./js/test1.js', './js/test2.js'])
+    .task('concat')
+    .task('write', { name: './build/output.js' })
+    .run();
+
+new Queue('lint')
+    .task('files', ['./js/test1.js'])
+    .task('jslint')
+    .run();
+```
+
+<p>Here, each Queue is executed at the same time and doesn't rely on the output from any other task to complete</p>
+
+<p>You can use any combination of multiple queues and forks to make parts of your build process parallel.</p>
+
+<h3>Tasks</h3>
+
+<p>Tasks are the building blocks you put together to make up your build processes. If you are familiar with either
+unix or windows command line shells, they act similarly to a set of piped commands where the output from one is taken
+as the input for the next.
+</p>
