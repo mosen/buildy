@@ -23,11 +23,15 @@
         "less"       : "1.2.x",
         "uglify-js"  : "1.2.x",
         "handlebars" : "1.0.x",
-        "winston"    : "0.5.x"
+        "winston"    : "0.5.x",
+        "mime"       : "1.2.x"
     },
     "devDependencies" : {
         "expresso" : "0.9.x",
         "temp" : "0.4.x"
+    },
+    "engines" : {
+        "node" : ">=0.6.0"
     },
     "preferGlobal" : true
 }
