@@ -7,6 +7,31 @@ var assert = require('assert'),
     path   = require('path'),
     fs     = require('fs');
 
+function attachCprfLogging(cprf_emitter) {
+    console.log('Attaching log statements to cprf object.');
+
+    cprf_emitter.on('warning', function(err) {
+        console.log('cprf warning:' + err);
+    });
+
+    cprf_emitter.on('excluded', function(err) {
+        console.log('cprf exclusion:' + err);
+    });
+
+    cprf_emitter.on('traversed', function(fs_item) {
+        console.log('cprf traverse:' + fs_item);
+    });
+
+    cprf_emitter.on('fileStart', function(fs_item) {
+        console.log('cprf start copy:' + fs_item);
+    });
+
+    cprf_emitter.on('complete', function(fs_item) {
+        console.log('cprf.copy complete');
+    });
+}
+
+
 module.exports = {
 
     /*
@@ -16,9 +41,11 @@ module.exports = {
     'smoke test copy' : function(beforeExit, assert) {
         var destFile = temp.path({ suffix: '.css' });
 
-        cprf.copy('./test/fixtures/test1.css', destFile, function(err) {
+        var emitter = cprf.copy('./test/fixtures/test1.css', destFile, function(err) {
             assert.ok(!err, "Cprf does not call back with an error");
         });
+
+        attachCprfLogging(emitter);
 
         beforeExit(function() {
            fs.unlinkSync(destFile);
@@ -117,9 +144,15 @@ module.exports = {
      */
 
     'smoke test cprf' : function(beforeExit, assert) {
-        var destDir = temp.mkdirSync('cprftest_smoke');
+        var destDir = temp.mkdirSync('cprftest_smoke'),
+            callbackDone = false;
 
-        cprf.cprf(['./test/fixtures/test1.css'], destDir, function(err, results){
+        beforeExit(function() {
+            assert.ok(callbackDone, "Callback was actually called.");
+        });
+
+        cprf.cprf(['./test/fixtures/test1.css'], destDir, function(err, results) {
+            callbackDone = true;
             assert.equal(0, results.failed.length, "None of the files in the copy list failed.");
         });
     },
@@ -132,7 +165,7 @@ module.exports = {
         assert.ok(path.existsSync('./test/fixtures/test_concat_a.js'), "Fixture test_concat_a.js exists.");
         assert.ok(path.existsSync('./test/fixtures/test_concat_b.js'), "Fixture test_concat_b.js exists.");
 
-        cprf.cprf(['./test/fixtures/test_concat_*'], destDir, function(err, results) {
+        var cprf_emitter = cprf.cprf(['./test/fixtures/test_concat_*'], destDir, function(err, results) {
             callbackDone = true;
 
             assert.equal(0, results.failed.length, "None of the files in the copy list failed.");
@@ -142,7 +175,10 @@ module.exports = {
             assert.ok(path.existsSync(destDir + '/test_concat_b.js'), "Fixture test_concat_b.js was copied.");
         });
 
+
+
         beforeExit(function() {
+            // TODO - Currently failing.
             assert.ok(callbackDone, "Callback was actually called.");
         });
     },
@@ -157,6 +193,7 @@ module.exports = {
 
         cprf.cprf(['./test/fixtures/test_concat_*'], destDir, function(err, results) {
             callbackDone = true;
+            console.log('cprftest_wildcard_exclude:callback called');
 
             assert.equal(0, results.failed.length, "None of the files in the copy list failed.");
             assert.equal(2, results.complete.length, "Only the two fixtures were copied.");
@@ -166,6 +203,7 @@ module.exports = {
         }, { excludes : ['test_concat_b.js'] });
 
         beforeExit(function() {
+            // TODO - Currently failing even though test suggests it is running ok.
             assert.ok(callbackDone, "Callback was actually called.");
         });
     },

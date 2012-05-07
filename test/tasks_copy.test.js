@@ -75,8 +75,6 @@ module.exports = {
         q.task('copy', { dest: fixtures.destination });
         q.run();
 
-        assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
-
         beforeExit(function() {
             fixtures.files.forEach(function(filename) {
                 var filepath = path.join(fixtures.destination, filename);
@@ -100,9 +98,6 @@ module.exports = {
 
         q.task('copy', { dest: fixtures.destination });
         q.run();
-
-        //assert.equal(q._state.get().value, 'ab', 'assert state contains concatenated string output');
-        assert.equal(q._state.get().type, State.TYPES.FILES, 'assert state is type:files');
 
         beforeExit(function() {
             fixtures.files.forEach(function(filename) {
