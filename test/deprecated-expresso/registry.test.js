@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    Registry = require('../lib/buildy/registry'),
+    Registry = require('../../lib/buildy/registry'),
     util = require('util');
 
 module.exports = {

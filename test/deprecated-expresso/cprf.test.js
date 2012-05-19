@@ -2,7 +2,7 @@
  * cprf unit tests
  */
 var assert = require('assert'),
-    cprf   = require('../lib/buildy/cprf'),
+    cprf   = require('../../lib/buildy/copy_recursive'),
     temp   = require('temp'),
     path   = require('path'),
     fs     = require('fs');

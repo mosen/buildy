@@ -2,9 +2,9 @@
  * Built in task test case - jsminify
  */
 var assert = require('assert'),
-    Queue = require('../lib/buildy/queue'),
+    Queue = require('../../lib/buildy/queue'),
     path = require('path'),
-    State = require('../lib/buildy/state'),
+    State = require('../../lib/buildy/state'),
     fixtures = {
         files : ['./test/fixtures/test1.js'],
         string : 'function a() {}',

@@ -1,6 +1,5 @@
 /**
  * vows js test suite
- *
  */
 
 var vows = require('vows');

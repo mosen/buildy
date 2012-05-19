@@ -1,8 +1,8 @@
 var assert = require('assert'),
     winston = require('../node_modules/winston'),
-    Registry = require('../lib/buildy/registry'),
-    State = require('../lib/buildy/state'),
-    Queue = require('../lib/buildy').Queue,
+    Registry = require('../../lib/buildy/registry'),
+    State = require('../../lib/buildy/state'),
+    Queue = require('../../lib/buildy').Queue,
 
     fixtures = {
         files : ['./test/fixtures/test1.js'],

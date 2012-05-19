@@ -2,8 +2,8 @@
  * Built in task test case - write
  */
 var assert = require('assert'),
-    Queue = require('../lib/buildy/queue'),
-    State = require('../lib/buildy/state'),
+    Queue = require('../../lib/buildy/queue'),
+    State = require('../../lib/buildy/state'),
     fs = require('fs'),
     path = require('path'),
     fixtures = {
