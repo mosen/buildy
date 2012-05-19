@@ -54,4 +54,24 @@ vows.describe('Generating file lists').addBatch({
             assert.equal(-1, data.indexOf(fixtures.file));
         }
     }
+    , 'when called with one file that is also excluded via regex': {
+        topic: function() {
+            filelist([fixtures.file], this.callback, { exclude: [fixtures.fileregex] });
+        },
+        'the file is excluded from the results': function(err, data) {
+            assert.equal(-1, data.indexOf(fixtures.file));
+        }
+    }
+    // TODO: Globbing fails with zero items returned on windows platform, due to node-glob relying upon / character
+    , 'when called with glob ./fixtures/test*.js': {
+        topic: function() {
+            filelist([fixtures.glob], this.callback);
+        },
+        'the callback does not receive an error': function(err, data) {
+            assert.isNull(err);
+        },
+        'the result contains 2 filenames': function(err, data) {
+            assert.equal(data.length, 2);
+        }
+    }
 }).export(module);
