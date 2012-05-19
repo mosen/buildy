@@ -46,4 +46,12 @@ vows.describe('Generating file lists').addBatch({
             assert.ok(err);
         }
     }
+    , 'when called with one file that is also excluded': {
+        topic: function() {
+            filelist([fixtures.file], this.callback, { exclude: [fixtures.file] });
+        },
+        'the file is excluded from the results': function(err, data) {
+            assert.equal(-1, data.indexOf(fixtures.file));
+        }
+    }
 }).export(module);
