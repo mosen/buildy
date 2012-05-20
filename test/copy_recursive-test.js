@@ -17,6 +17,9 @@ vows.describe('Copy recursive module').addBatch({
         topic: function() {
             copy_recursive([fixtures.file], './fixtures/dir/somewhere', this.callback);
         },
+        'the callback does not receive an error': function(err, results) {
+            assert.ok(!err);
+        },
         'the source file is copied to the directory' : function(err, results) {
             assert.ok(path.existsSync('./fixtures/dir/somewhere'));
         },

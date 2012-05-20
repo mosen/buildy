@@ -74,4 +74,16 @@ vows.describe('Generating file lists').addBatch({
             assert.equal(data.length, 2);
         }
     }
+    , 'when called with a specified context': {
+        topic: function() {
+            var self = this;
+
+            filelist([fixtures.file], function _inContextTest(err , data) {
+                self.callback(err, this);
+            }, { context: "test_suite_context", exclude: [] });
+        },
+        'the this keyword refers to that context' : function(err, context) {
+            assert.equal(context, "test_suite_context");
+        }
+    }
 }).export(module);
