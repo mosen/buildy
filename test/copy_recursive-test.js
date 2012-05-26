@@ -47,7 +47,6 @@ vows.describe('Copying batches of directories recursively').addBatch({
             });
         },
         'the file exists at the destination with the new name' : function (err, results) {
-            console.log(err);
             assert.ok(path.existsSync(path.join(fixtures.temp_directory_b, 'non-existent-filename')));
         }
     }
