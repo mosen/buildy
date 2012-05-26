@@ -11,3 +11,8 @@ which have them omitted (parameters are not merged with user supplied parameters
 v0.0.7
 ------
 + Fixed a bug where forked queues would not inherit the task skip list or the task defaults.
+
+v0.0.8
+------
++ Replaced file globbing to add win32 support
++ Restructure of the entire file copy system
