@@ -86,4 +86,15 @@ vows.describe('Generating file lists').addBatch({
             assert.equal(context, "test_suite_context");
         }
     }
+    , 'when called with a relative directory name': {
+        topic: function() {
+            filelist([fixtures.directory_relative], this.callback);
+        },
+        'every result contains relative paths only': function(err, data) {
+            data.forEach(function (item) {
+                assert.ok(item.substr(0, 1) !== '/', 'expected path does not start with unix directory separator');
+                assert.ok(item.substr(1, 1) !== ':', 'expected path does not contain windows drive letter separator');
+            });
+        }
+    }
 }).export(module);
