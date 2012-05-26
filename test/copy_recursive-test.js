@@ -12,21 +12,25 @@ var fixtures = require('./fixtures.js');
 
 var copy_recursive = require('../lib/buildy/copy_recursive');
 
+function _attachConsole(o) {
+    o.on('copy', function (src, dst) {
+        console.log('copy: ' + src + ' ' + dst);
+    });
+
+    o.on('success', function (src, dst) {
+        console.log('done: ' + src + ' ' + dst);
+    });
+}
+
 vows.describe('Copying batches of directories recursively').addBatch({
     'when copying a file to a new temp directory' : {
         topic : function () {
             fixtures.temp_directory = temp.mkdirSync();
             var cpr = copy_recursive([fixtures.file], fixtures.temp_directory, this.callback);
-
-            cpr.on('copy', function(src, dst) {
-                console.log('copy: ' + src + ' ' + dst);
-            });
-
-            cpr.on('success', function(src, dst) {
-                console.log('done: ' + src + ' ' + dst);
-            });
+            _attachConsole(cpr);
         },
         'the callback does not receive an error' : function (err, results) {
+            console.log(err);
             assert.ok(!err);
         },
         'the source file is copied to the directory' : function (err, results) {
@@ -37,30 +41,24 @@ vows.describe('Copying batches of directories recursively').addBatch({
         topic : function () {
             fixtures.temp_directory_b = temp.mkdirSync();
             var cpr = copy_recursive([fixtures.file], path.join(fixtures.temp_directory_b, 'non-existent-filename'), this.callback);
-
-            cpr.on('copy', function(src, dst) {
-                console.log('copy: ' + src + ' ' + dst);
-            });
-
-            cpr.on('success', function(src, dst) {
-                console.log('done: ' + src + ' ' + dst);
-            });
+            _attachConsole(cpr);
         },
         'the file exists at the destination with the new name' : function (err, results) {
             assert.ok(path.existsSync(path.join(fixtures.temp_directory_b, 'non-existent-filename')));
         }
+    }, 'when supplied a single existing source directory (no trailing slash), and a destination directory' : {
+        topic : function () {
+            fixtures.temp_directory_c = temp.mkdirSync();
+            var cpr = copy_recursive([fixtures.directory], fixtures.temp_directory_c, this.callback);
+            _attachConsole(cpr);
+        },
+        'the source directory is copied as a child of the destination directory' : function (err, results) {
+            assert.ok(path.existsSync(path.join(fixtures.temp_directory_c, fixtures.directory)));
+        },
+        'the contents of the destination directory match the contents of the source directory' : function () {
+
+        }
     }
-//    , 'when supplied a single source directory (no trailing slash), and a destination directory' : {
-//        topic : function() {
-//
-//        },
-//        'the source directory is copied as a child of the destination directory' : function() {
-//
-//        },
-//        'the contents of the destination directory match the contents of the source directory' : function() {
-//
-//        }
-//    }
 //    , 'when supplied a single source directory (trailing slash), and a destination directory' : {
 //        topic : function() {
 //
