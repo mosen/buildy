@@ -12,7 +12,7 @@ var fixtures = require('./fixtures.js');
 
 var copy_recursive = require('../lib/buildy/copy_recursive');
 
-vows.describe('Copy recursive module').addBatch({
+vows.describe('Copying batches of directories recursively').addBatch({
     'when copying a file to an existing directory' : {
         topic: function() {
             fixtures.temp_directory = temp.mkdirSync();
