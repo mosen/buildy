@@ -15,4 +15,6 @@ v0.0.7
 v0.0.8
 ------
 + Replaced file globbing to add win32 support
-+ Restructure of the entire file copy system
++ Restructure of the entire file copy system, *NOTE*: task 'copy' now respects whether a trailing slash appears in the
+source path. Without the slash; the source directory will be copied as a child of the destination. With a trailing
+slash; the contents of the source directory are copied to the destination.
