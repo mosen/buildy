@@ -25,7 +25,7 @@ function _attachConsole(o, prefix) {
     });
 }
 
-vows.describe('Copying batches of directories recursively').addBatch({
+vows.describe('CopyRecursive').addBatch({
     'when copying a file to a new temp directory' : {
         topic : function () {
             fixtures.temp_directory = temp.mkdirSync();
@@ -58,25 +58,22 @@ vows.describe('Copying batches of directories recursively').addBatch({
         topic : function () {
             fixtures.temp_directory_c = temp.mkdirSync();
             var cpr = copy_recursive([fixtures.directory], fixtures.temp_directory_c, this.callback);
-            _attachConsole(cpr);
+            _attachConsole(cpr, 'no trailing slash');
         },
         'the source directory is copied as a child of the destination directory' : function (err, results) {
             var expectedDest = path.join(fixtures.temp_directory_c, path.basename(fixtures.directory));
             assert.ok(path.existsSync(expectedDest), 'Expected to exist: ' + expectedDest);
         }
-//        'the contents of the destination directory match the contents of the source directory' : function () {
-//
-//        }
     }
-//    , 'when supplied a single source directory (trailing slash), and a destination directory' : {
-//        topic : function() {
-//
-//        },
-//        'the source directory is not created as a child of the destination directory' : function() {
-//
-//        },
-//        'the contents of the destination directory match the contents of the source directory' : function() {
-//
-//        }
-//    }
+    , 'when supplied a single source directory (trailing slash), and a destination directory' : {
+        topic : function() {
+            fixtures.temp_directory_d = temp.mkdirSync();
+            var cpr = copy_recursive([fixtures.directory + '\\'], fixtures.temp_directory_d, this.callback);
+            _attachConsole(cpr, 'trailing slash');
+        },
+        'the source directory is not created as a child of the destination directory' : function() {
+            var expectedDest = path.join(fixtures.temp_directory_c, path.basename(fixtures.directory));
+            assert.ok(path.existsSync(expectedDest), 'Expected not to exist: ' + expectedDest);
+        }
+    }
 }).export(module);
