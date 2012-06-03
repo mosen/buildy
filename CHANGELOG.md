@@ -20,3 +20,5 @@ source path. Without the slash; the source directory will be copied as a child o
 slash; the contents of the source directory are copied to the destination.
 + Decided that State returning an object with multiple keys, and setting the state being two completely different looking
 API's was a bit strange. Unified state into a more simplistic and hopefully more intuitive API.
++ Custom task exports now declare the types of content they will accept, reducing the boilerplate required in each type
+to check if the content is not supported by the task.

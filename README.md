@@ -265,6 +265,9 @@ TODO
 
 * Convert all unit tests to mocha (any testing framework requiring C++ extensions would make development on win32 difficult).
 Yes I do change my testing framework very often, hopefully mocha will be suitable for all platforms.
+* queue._state should move to queue.state
+* tasks should be able to emit complete/failed on `this` context object. as in concat.js example.
+* tasks should have access to logger in this.logger context.
 * Check the validity of using fs.sendfile() to copy files (*nix and win32) all the way back to node v0.4.x
 * Clarify the custom task autoloading method.
 * 100% test coverage of each task.
