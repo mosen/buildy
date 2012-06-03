@@ -18,3 +18,5 @@ v0.0.8
 + Restructure of the entire file copy system, *NOTE*: task 'copy' now respects whether a trailing slash appears in the
 source path. Without the slash; the source directory will be copied as a child of the destination. With a trailing
 slash; the contents of the source directory are copied to the destination.
++ Decided that State returning an object with multiple keys, and setting the state being two completely different looking
+API's was a bit strange. Unified state into a more simplistic and hopefully more intuitive API.

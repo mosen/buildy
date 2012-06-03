@@ -12,7 +12,7 @@ var fixtures = require('./fixtures.js');
 
 var buildy = require('../lib/buildy.js');
 
-vows.describe('Generating a list of files using the files task').addBatch({
+vows.describe('Generating a list of files using the "files" task').addBatch({
     'when run in a queue with a single filename' : {
         topic: function() {
             var q = new buildy.Queue('test');

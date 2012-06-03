@@ -263,6 +263,8 @@ Execution will continue on the next task in the queue.
 TODO
 ====
 
+* Convert all unit tests to vows (any testing framework requiring C++ extensions would make development on win32 difficult).
+* Check the validity of using fs.sendfile() to copy files (*nix and win32) all the way back to node v0.4.x
 * Clarify the custom task autoloading method.
 * 100% test coverage of each task.
 * Standardise an option for producing .json formatted reports from tasks that produce that kind of output. (probably use
