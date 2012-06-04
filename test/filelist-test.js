@@ -4,7 +4,7 @@ var path = require('path');
 var filelist = require('../lib/buildy/filelist');
 var should = require('should');
 
-describe('Filelist', function() {
+describe('filelist:', function() {
     describe('when called with a single, existing file', function() {
 
         it('should not call back with an error', function(done) {
@@ -87,11 +87,25 @@ describe('Filelist', function() {
     describe('when called with a relative directory path', function() {
         it('should only return results with relative path prefixes', function(done) {
             filelist(['./fixtures/dir'], function(err, data) {
+
                 data.forEach(function (item) {
                     item[0].should.not.equal('/'); // Nix
                     item[1].should.not.equal(':'); // Win32
                 });
 
+                done();
+            });
+        });
+    });
+
+    // Regression tests
+    describe('when called with a directory that contains more than one item', function() {
+        var callbacks = 0;
+
+        it('should not execute the callback multiple times', function(done) {
+            filelist(['./fixtures/dir'], function(err, data) {
+                callbacks++;
+                callbacks.should.not.equal(2);
                 done();
             });
         });
