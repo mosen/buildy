@@ -7,7 +7,7 @@ var assert = require('assert');
 var temp = require('temp');
 
 var path = require('path');
-var copy = require('../lib/buildy/copy');
+var copy = require('../../lib/buildy/copy');
 
 var fixtures = {
     nonexistent: './fixtures/non-existent-dir/non-existent-file',

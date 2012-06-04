@@ -10,7 +10,7 @@ var temp     = require('temp');
 var path     = require('path');
 var fixtures = require('./fixtures.js');
 
-var buildy = require('../lib/buildy.js');
+var buildy = require('../../lib/buildy.js');
 
 vows.describe('Generating a list of files using the "files" task').addBatch({
     'when run in a queue with a single filename' : {

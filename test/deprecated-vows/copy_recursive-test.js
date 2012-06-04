@@ -11,7 +11,7 @@ var path = require('path');
 var fs = require('fs');
 var fixtures = require('./fixtures.js');
 
-var copy_recursive = require('../lib/buildy/copy_recursive');
+var copy_recursive = require('../../lib/buildy/copy_recursive');
 
 var logging_enabled = false;
 
