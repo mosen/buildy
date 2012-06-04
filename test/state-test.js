@@ -65,5 +65,15 @@ describe('State', function() {
             state.meta('file2.js').should.include({ filename: 'file2.js', encoding: 'utf8' });
             state.meta('file3.js').should.include({ filename: 'file3.js', encoding: 'utf8' });
         });
+
+        it('should allow us to iterate with forEach 3 times', function() {
+            var iterations = 0;
+
+            state.forEach(function(key, value, meta) {
+                iterations++;
+            }, this);
+
+            iterations.should.equal(3);
+        });
     });
 });
