@@ -7,6 +7,7 @@ var should = require('should');
 var fixtures = require('./fixtures');
 var copy_recursive = require('../lib/buildy/copy_recursive');
 
+// Log custom events to the console
 var logging_enabled = false;
 
 function _attachConsole(o, prefix) {
@@ -15,6 +16,10 @@ function _attachConsole(o, prefix) {
     if (logging_enabled) {
         o.on('copy', function (src, dst) {
             console.log(prefix + ' copy: ' + src + ' ' + dst);
+        });
+
+        o.on('copied', function (src, dst) {
+            console.log(prefix + ' copied: ' + src + ' ' + dst);
         });
 
         o.on('success', function (src, dst) {
@@ -32,7 +37,7 @@ describe('copy recursive:', function() {
                 path.existsSync(path.join(tempdir, path.basename(fixtures.file))).should.be.true;
                 done(err);
             });
-            _attachConsole(cpr, 'when copying a file to a directory:');
+            _attachConsole(cpr, 'file:');
         });
     });
 
@@ -43,7 +48,7 @@ describe('copy recursive:', function() {
                 path.existsSync(path.join(tempdir, 'non-existent-filename')).should.be.true;
                 done(err);
             });
-            _attachConsole(cpr, 'when copying a file to a destination filename that doesnt exist:');
+            _attachConsole(cpr, 'destnotexist:');
         });
     });
 
@@ -55,7 +60,7 @@ describe('copy recursive:', function() {
                 path.existsSync(path.join(tempdir, path.basename(fixtures.directory))).should.be.true;
                 done(err);
             });
-            _attachConsole(cpr, 'when copying from a directory without trailing slash:');
+            _attachConsole(cpr, 'fromdirnoslash:');
         });
     });
 
@@ -66,7 +71,7 @@ describe('copy recursive:', function() {
                 path.existsSync(path.join(tempdir, path.basename(fixtures.directory))).should.be.false;
                 done(err);
             });
-            _attachConsole(cpr, 'when copying from a directory with a trailing slash:');
+            _attachConsole(cpr, 'fromdirslash:');
         });
     });
 
@@ -79,7 +84,7 @@ describe('copy recursive:', function() {
                 callbacks.should.not.equal(2);
                 done(err);
             });
-            _attachConsole(cpr, 'regression when copying a directory with more than one item:');
+            _attachConsole(cpr, 'regressioncallbacks:');
         });
     });
 });
