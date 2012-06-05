@@ -69,14 +69,19 @@ describe('filelist:', function() {
         });
     });
 
-//    describe('when called with a glob (' + fixtures.glob + ')', function() {
-//        it('should return an array with 2 elements', function(done) {
-//            filelist([fixtures.glob], function(err, data) {
-//                data.should.have.lengthOf(2);
-//                done();
-//            });
-//        });
-//    });
+    // Absolute path globs failing on win32
+    describe('when called with a glob (' + fixtures.glob + ')', function() {
+        it('should return an array with 2 elements', function(done) {
+            var flemitter = filelist([fixtures.glob], function(err, data) {
+                data.should.have.lengthOf(2);
+                done();
+            });
+
+            flemitter.on('glob', function(globname) {
+                console.log('globbed: ' + globname);
+            });
+        });
+    });
 
     describe('when called with a specified context option', function() {
         it('should execute the callback in that context', function(done) {
