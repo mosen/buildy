@@ -53,16 +53,16 @@ describe('filelist:', function() {
     // Failing w/time out
     describe('when called with an excluded file', function() {
         it('should exclude that file from the results', function(done) {
-            filelist(['./fixtures/test1.js'], function(err, data) {
+            filelist([fixtures.file], function(err, data) {
                 data.should.have.lengthOf(0);
                 done();
-            }, { exclude: ['./fixtures/test1.js'] });
+            }, { exclude: [fixtures.file] });
         });
     });
 
     describe('when called with a file that is excluded by regex', function() {
         it('should exclude that file from the results', function(done) {
-            filelist(['./fixtures/test1.js'], function(err, data) {
+            filelist([fixtures.file], function(err, data) {
                 data.should.have.lengthOf(0);
                 done();
             }, { exclude: [ /test1.js/ ] });
@@ -92,19 +92,19 @@ describe('filelist:', function() {
         });
     });
 
-//    describe('when called with a relative directory path', function() {
-//        it('should only return results with relative path prefixes', function(done) {
-//            filelist(['./fixtures/dir'], function(err, data) {
-//
-//                data.forEach(function (item) {
-//                    item[0].should.not.equal('/'); // Nix
-//                    item[1].should.not.equal(':'); // Win32
-//                });
-//
-//                done();
-//            });
-//        });
-//    });
+    describe('when called with a relative directory path', function() {
+        it('should only return results with relative path prefixes', function(done) {
+            filelist([path.relative(fixtures.directory)], function(err, data) {
+
+                data.forEach(function (item) {
+                    item[0].should.not.equal('/'); // Nix
+                    item[1].should.not.equal(':'); // Win32
+                });
+
+                done(err);
+            });
+        });
+    });
 
     // Regression tests
     describe('when called with a directory that contains more than one item', function() {

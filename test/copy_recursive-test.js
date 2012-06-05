@@ -52,7 +52,6 @@ describe('copy recursive:', function() {
         });
     });
 
-    // Failing due to multiple callbacks
     describe('when copying from a directory without trailing slash', function() {
         it('should copy the directory as a child of the destination', function(done) {
             var tempdir = temp.mkdirSync();

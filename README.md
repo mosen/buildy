@@ -263,23 +263,16 @@ Execution will continue on the next task in the queue.
 TODO
 ====
 
-* Convert all unit tests to mocha (any testing framework requiring C++ extensions would make development on win32 difficult).
-Yes I do change my testing framework very often, hopefully mocha will be suitable for all platforms.
-* queue._state should move to queue.state
-* tasks should be able to emit complete/failed on `this` context object. as in concat.js example.
-* tasks should have access to logger in this.logger context.
-* should use the excellent `async` module instead of home grown asynchronous structure.
+* Convert all test suites to mocha (40%)
+* Update tasks to suit new custom task format (Types of input declared explicitly, queue methods renamed).
+* Update registry to suit new custom task format.
+* Tasks should have access to logger in this.logger context (Queue object context).
+* Convert asynchronous code of my own to use the `async` module instead (20%).
 * Check the validity of using fs.sendfile() to copy files (*nix and win32) all the way back to node v0.4.x
-* Clarify the custom task autoloading method.
-* 100% test coverage of each task.
-* Standardise an option for producing .json formatted reports from tasks that produce that kind of output. (probably use
-winston metadata/custom transports).
-* Determine a strategy for dealing with tasks that operate on a batch of files where the output is also files. Use
-destination dir, file prefix, file suffix options.
+* Document and design in more detail how custom tasks are loaded or added from your own project.
+* Produce reports in various formats from tasks. Try to seperate reporting (details of build) from logging (events in
+the build process).
+* Determine a strategy for dealing with tasks that operate on a batch of files where the output is also a batch of
+files. Use file and path modifiers for the write task like a "filename prefix", and a "filename suffix" to get custom
+output naming.
 * Establish a defaults system, so that a task option can be defaulted for the entire queue or set of queues.
-* Files that are cast into strings should retain filename throughout the process, so that they may be written out based upon the original name.
-* Dont use an inspect task in the unit tests, the unit test might expose a problem with inspect instead of the subject.
-
-non piped file output should take these options:
-{ dir: '/output/directory', prefix: 'prepended-to-filename', suffix: 'appended-to-filename' }
-this is to handle a multiple-string or multiple-file operation
