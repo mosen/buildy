@@ -9,7 +9,7 @@ var assert = require('assert');
 var temp = require('temp');
 var path = require('path');
 var fs = require('fs');
-var fixtures = require('./fixtures.js');
+var fixtures = require('./../fixtures.js');
 
 var copy_recursive = require('../../lib/buildy/copy_recursive');
 

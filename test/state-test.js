@@ -1,4 +1,5 @@
 /*global describe, it*/
+// Mocha test suite
 var State = require('../lib/buildy/state.js');
 var should = require('should');
 

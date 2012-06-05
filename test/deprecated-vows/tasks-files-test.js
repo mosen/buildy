@@ -8,7 +8,7 @@ var vows     = require('vows');
 var assert   = require('assert');
 var temp     = require('temp');
 var path     = require('path');
-var fixtures = require('./fixtures.js');
+var fixtures = require('./../fixtures.js');
 
 var buildy = require('../../lib/buildy.js');
 

@@ -1,4 +1,5 @@
 /*global describe, it*/
+// Mocha test suite
 var temp = require('temp');
 var path = require('path');
 var filelist = require('../lib/buildy/filelist');
