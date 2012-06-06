@@ -265,7 +265,8 @@ TODO
 
 * Convert all test suites to mocha (40%)
 * Update tasks to suit new custom task format (Types of input declared explicitly, queue methods renamed).
-* Update registry to suit new custom task format.
+* Update registry to suit new custom task format. Accepted types must be specified which takes a bit of syntax away
+from the task code itself.
 * Tasks should have access to logger in this.logger context (Queue object context).
 * Convert asynchronous code of my own to use the `async` module instead (20%).
 * Check the validity of using fs.sendfile() to copy files (*nix and win32) all the way back to node v0.4.x

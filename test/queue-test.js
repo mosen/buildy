@@ -9,6 +9,7 @@ var should = require('should');
 
 describe('queue:', function() {
 
+    // Failing due to registry not recognising new task format
     describe('when run with a single task', function() {
         it('should not throw an error', function(done) {
             var q = new Queue('when run with a single task');
