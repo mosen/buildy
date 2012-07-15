@@ -43,14 +43,14 @@ describe('task:concat ', function() {
             done();
         });
 
-        it('should contain those files concatenated', function(done) {
-            var q = new Queue('task:concat', {
-                state: new State([fixtures.file, fixtures.file], 'FILE', {})
-            });
-
-            q.task('concat').run();
-            q.state.value().should.eql('foobar');
-            done();
-        });
+//        it('should contain those files concatenated', function(done) {
+//            var q = new Queue('task:concat', {
+//                state: new State([fixtures.file, fixtures.file], 'FILE', {})
+//            });
+//
+//            q.task('concat').run();
+//            q.state.value().should.eql('foobar');
+//            done();
+//        });
     });
 });
