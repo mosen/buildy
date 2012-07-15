@@ -5,7 +5,7 @@ var should = require('should');
 
 describe('State', function() {
 
-    var state = new State('String contents');
+    var state = new State('String contents', State.TYPES.STRING);
 
     describe('when constructing a state with a string', function() {
 
@@ -17,12 +17,8 @@ describe('State', function() {
             state.length().should.equal(1);
         });
 
-        it('should contain an object with a single property', function() {
-            Object.keys(state.value()).should.have.lengthOf(1);
-        });
-
         it('should contain a single value equal to "String contents"', function() {
-            state.value()[0].should.equal('String contents');
+            state.value().should.equal('String contents');
         });
     });
 });
@@ -54,18 +50,18 @@ describe('State', function() {
         });
 
         it('should give values of [file1.js, file2.js, file3.js]', function() {
-            var values = state.value();
+            var values = state.values();
 
             values.should.include('file1.js');
             values.should.include('file2.js');
             values.should.include('file3.js');
         });
 
-        it('should populate the metadata with the filenames given', function() {
-            state.meta('file1.js').should.include({ filename: 'file1.js', encoding: 'utf8' });
-            state.meta('file2.js').should.include({ filename: 'file2.js', encoding: 'utf8' });
-            state.meta('file3.js').should.include({ filename: 'file3.js', encoding: 'utf8' });
-        });
+//        it('should populate the metadata with the filenames given', function() {
+//            state.meta('file1.js').should.include({ filename: 'file1.js', encoding: 'utf8' });
+//            state.meta('file2.js').should.include({ filename: 'file2.js', encoding: 'utf8' });
+//            state.meta('file3.js').should.include({ filename: 'file3.js', encoding: 'utf8' });
+//        });
 
         it('should allow us to iterate with forEach 3 times', function() {
             var iterations = 0;
