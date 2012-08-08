@@ -10,10 +10,18 @@ describe('copy:', function() {
     describe('when the source doesnt exist', function() {
 
         it('should call back with an error', function(done) {
-            copy(fixtures.nonexistent, '', function(err, src, dst) {
+            copy('', fixtures.nonexistent, function(err, src, dst) {
                 should.exist(err);
                 done();
             });
+        });
+    });
+
+    describe('regression when copy is passed an object containing options', function() {
+        it('should have an options property containing a reference to the same options we supplied', function(done) {
+            var c = copy(fixtures.file, fixtures.nonexistent, function(err, src, dst) {
+                done();
+            }, { mkdir: false });
         });
     });
 
@@ -23,15 +31,15 @@ describe('copy:', function() {
             copy(fixtures.file, fixtures.nonexistent, function(err, src, dst) {
                 should.exist(err);
                 done();
-            });
-        }, { mkdir: false });
+            }, { mkdir: false });
+        });
 
         it('should not copy the file to the nonexistent destination', function(done) {
             copy(fixtures.file, fixtures.nonexistent, function(err, src, dst) {
                 fs.existsSync(fixtures.nonexistent).should.be.false
                 done();
-            });
-        }, { mkdir: false });
+            }, { mkdir: false });
+        });
     });
 
     describe('when the destination doesnt exist and mkdir is true', function() {
