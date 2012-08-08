@@ -2,7 +2,7 @@
 // Mocha test suite
 var copy = require('../lib/buildy/copy');
 var temp = require('temp');
-var path = require('path');
+var fs = require('fs');
 var should = require('should');
 var fixtures = require('./fixtures');
 
@@ -25,6 +25,13 @@ describe('copy:', function() {
                 done();
             });
         }, { mkdir: false });
+
+        it('should not copy the file to the nonexistent destination', function(done) {
+            copy(fixtures.file, fixtures.nonexistent, function(err, src, dst) {
+                fs.existsSync(fixtures.nonexistent).should.be.false
+                done();
+            });
+        }, { mkdir: false });
     });
 
     describe('when the destination doesnt exist and mkdir is true', function() {
@@ -32,7 +39,7 @@ describe('copy:', function() {
         it('should create the destination path', function(done) {
            copy(fixtures.file, temp.path({ suffix: '.js' }), function(err, src, dst) {
                should.not.exist(err);
-               path.existsSync(dst).should.be.true;
+               fs.existsSync(dst).should.be.true;
                done();
            }, { mkdir: true });
         });

@@ -3,6 +3,7 @@
 var copy = require('../lib/buildy/copy');
 var temp = require('temp');
 var path = require('path');
+var fs = require('fs');
 var should = require('should');
 var fixtures = require('./fixtures');
 var copy_recursive = require('../lib/buildy/copy_recursive');
@@ -34,7 +35,7 @@ describe('copy recursive:', function() {
         it('the file should exist in that directory', function(done) {
             var tempdir = temp.mkdirSync();
             var cpr = copy_recursive([fixtures.file], tempdir, function(err, results) {
-                path.existsSync(path.join(tempdir, path.basename(fixtures.file))).should.be.true;
+                fs.existsSync(path.join(tempdir, path.basename(fixtures.file))).should.be.true;
                 done(err);
             });
             _attachConsole(cpr, 'file:');
@@ -45,7 +46,7 @@ describe('copy recursive:', function() {
         it('should create the destination file', function(done) {
             var tempdir = temp.mkdirSync();
             var cpr = copy_recursive([fixtures.file], path.join(tempdir, 'non-existent-filename'), function(err, results) {
-                path.existsSync(path.join(tempdir, 'non-existent-filename')).should.be.true;
+                fs.existsSync(path.join(tempdir, 'non-existent-filename')).should.be.true;
                 done(err);
             });
             _attachConsole(cpr, 'destnotexist:');
@@ -56,7 +57,7 @@ describe('copy recursive:', function() {
         it('should copy the directory as a child of the destination', function(done) {
             var tempdir = temp.mkdirSync();
             var cpr = copy_recursive([fixtures.directory], tempdir, function(err, results) {
-                path.existsSync(path.join(tempdir, path.basename(fixtures.directory))).should.be.true;
+                fs.existsSync(path.join(tempdir, path.basename(fixtures.directory))).should.be.true;
                 done(err);
             });
             _attachConsole(cpr, 'fromdirnoslash:');
@@ -67,7 +68,7 @@ describe('copy recursive:', function() {
         it('should not copy the source directory as a child of the destination', function(done) {
             var tempdir = temp.mkdirSync();
             var cpr = copy_recursive([fixtures.directory + '/'], tempdir, function(err, results) {
-                path.existsSync(path.join(tempdir, path.basename(fixtures.directory))).should.be.false;
+                fs.existsSync(path.join(tempdir, path.basename(fixtures.directory))).should.be.false;
                 done(err);
             });
             _attachConsole(cpr, 'fromdirslash:');

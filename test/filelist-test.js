@@ -94,7 +94,9 @@ describe('filelist:', function() {
 
     describe('when called with a relative directory path', function() {
         it('should only return results with relative path prefixes', function(done) {
-            filelist([path.relative(fixtures.directory)], function(err, data) {
+            var relative_path = path.relative('.', fixtures.directory);
+
+            filelist([relative_path], function(err, data) {
 
                 data.forEach(function (item) {
                     item[0].should.not.equal('/'); // Nix
