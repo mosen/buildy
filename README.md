@@ -2,13 +2,12 @@ What
 ====
 
 Buildy is a build system for web/javascript/node.js projects.
-It acts like a sequence of 'piped' commands.
 
 Main features:
-    - relatively brief syntax.
-    - can use asynchronous api where practical.
-    - tasks and task queues can execute in serial or parallel.
-    - extend the built in build tasks with your own tools, or 3rd party tools.
+    - Familiar pipeline concept, similar to the unix shell.
+    - Build instructions are executed as javascript, you can inject your own functionality anywhere in the process.
+    - You can extend the reusable build tasks, and they can be shared between your projects.
+    - Tasks can be executed in parallel or serially, and async API is used in each of the tasks.
 
 *WARNING: API still in development, and may change without notice until v1.0.0*
 
@@ -70,23 +69,28 @@ two or more build processes that have nothing to do with each other.
 How it works
 ============
 
-- Construct a `Queue` object with a name (for the logger output).
+- You construct a `Queue` object for each chain of tasks that are dependent on each other. Each queue has a name so that
+you will be able to recognise log output related to that queue.
 - Add a chain of tasks to the `Queue` using the `.task(name, options)` method. The input of each task is the output of
-the previous one. Some tasks, like `files`, generate output.
-- At the end of the `Queue` chain, call the `.run()` method. The `Queue` will then be automatically run as soon as node
-executes the queue file.
+the previous one. Some tasks, like `files`, generate output instead of modifying their input.
+- At the end of the `Queue` chain, call the `.run()` method. This signifies the end of the task chain. Optionally you
+can pass a function to the `run()` method to be executed upon completion of the `Queue`.
 
 Flow Control
 ------------
 
-The `fork` task splits the queue into sub-queues. These are run in parallel.
+The `fork` task splits the queue into sub-queues. These are run in parallel and asynchronously, so they are not
+guaranteed to finish at the same time.
 
-Each time you add a fork task, it becomes a new Queue with the name specified ('raw version' 
-in the last example). The new queue inherits its state from the parent, but acts independently from then on.
+Each time you add a fork task, it actually spawns a new Queue with the name specified ('raw version'
+in the last example). The new Queue inherits its state from the parent, but acts independently from then on.
 
 
 Built in tasks
 ==============
+
+Several tasks are built in to Buildy to carry out common build tasks. Some of these tasks rely on external libraries.
+(TODO: In future the task will be automatically disabled unless you decide to install the 3rd party module).
 
 The built in tasks are as follows:
 
@@ -165,6 +169,7 @@ Known bugs
 ----------
 
 The globbing module doesn't interpret relative paths using . or ..
+The globbing module doesn't support win32/64
 
 Custom tasks
 ============
@@ -179,11 +184,14 @@ Basic guidelines
 
 Take a look at some of the built in tasks (in ./lib/tasks) to see how a custom task should be structured.
 
-* Each task has its own source file, but you can publish many tasks in one file if you like.
+* Each task has its own source file, but you can publish many tasks in one file if you like. (for instance if there is
+a very small variation between two tasks that use the same 3rd party library).
 * The task file must export a property called `tasks`, which is an object.
 * The `tasks` object contains a property name, which the user supplies when invoking the task, and a function.
 * The task function is called with options, and an event emitter. The queue expects you to emit `complete` or `failed`
 from the emitter, to let it know the result of your asynchronous (or synchronous) task.
+* The state will wrap the string, file or stream input to your task. All you need to know is that state.read() will
+handle the underlying asynchronous I/O for whatever that state may be.
 
 Hello.js - a custom task example
 --------------------------------
@@ -197,7 +205,7 @@ function hello() {
     return 'hello world';
 }
 
-function helloHandler(options, promise) {
+function _hello(params, status, logger) {
     switch (this._state.get().type) { /* What type of input are we handling? we should handle every pseudo constant in
                                          State.TYPES.* */
 
@@ -227,7 +235,7 @@ function helloHandler(options, promise) {
 }
 
 exports.tasks = {
-    'hello' : helloHandler
+    'hello' : _hello
 }
 ```
 
