@@ -13,16 +13,15 @@ describe('task:copy ', function() {
     describe('when copying a single file to a destination filename', function() {
         it('should create the destination file', function(done) {
             var temp_dest = temp.path({ suffix: '.js' });
-            var q = new Queue('task:copy', {
-                state: new State(fixtures.file, { file: fixtures.file })
-            });
+            var q = new Queue('task:copy');
 
             q.on('taskComplete', function() { console.log('task complete'); });
             q.on('taskFailed', function() { console.log('task failed'); });
 
-            q.task('copy', { dest: temp_dest }).run();
-            fs.existsSync(temp_dest).should.be.true;
-            done();
+            q.task('copy', { src: [fixtures.file], dest: temp_dest }).run(function() {
+                fs.existsSync(temp_dest).should.be.true;
+                done();
+            });
         });
     });
 
