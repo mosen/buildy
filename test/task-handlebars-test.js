@@ -23,7 +23,6 @@ describe('task:handlebars ', function() {
             q.task('handlebars', {
                 template: 'foo bar {{content}}'
             }).run(function(err) {
-                console.log(err);
                 should.not.exist(err);
                 done();
             });
@@ -62,7 +61,6 @@ describe('task:handlebars ', function() {
             q.task('handlebars', {
                 template_file: fixtures.template
             }).run(function(err) {
-                console.log(err);
                 should.not.exist(err);
                 done();
             });

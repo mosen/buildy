@@ -10,22 +10,21 @@ var temp = require('temp');
 var assert = require('assert');
 var util = require('util');
 
-describe('task:csslint ', function() {
+describe('task:inspect ', function() {
 
-    describe('when linting an example file', function() {
+    describe('when run with a state containing a single string', function() {
+
         it('should not callback with an error', function(done) {
 
-            // TODO: Stub module csslint?
-            var q = new Queue('task:csslint', {
-                state: new State([{ name: fixtures.cssfile, file: fixtures.cssfile }])
+            var q = new Queue('task:handlebars', {
+                state: new State([{ name: 'string-value', string: 'foobar' }])
             });
 
-            q.task('csslint').run(function(err) {
+            q.task('inspect').run(function(err) {
                 should.not.exist(err);
                 done();
             });
 
         });
     });
-
 });
