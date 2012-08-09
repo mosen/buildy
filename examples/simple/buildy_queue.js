@@ -25,24 +25,24 @@ new Queue('build my component').task('files', ['js/*']) // all of these synchron
     .task('jslint')
     .task('concat')
     .task('fork', {
-        'debug version' : function() {
-             this.task('write', { name: './build/test-debug.js' })
-             .run();
+        'debug version' : function(done) {
+             this.task('write', { dest: './build/test-debug.js' })
+             .run(done);
         },
-        'raw version' : function() {
+        'raw version' : function(done) {
              this.task('replace', { regex: "^.*?(?:logger|Y.log).*?(?:;|\\).*;|(?:\r?\n.*?)*?\\).*;).*;?.*?\r?\n", replace: '', flags: 'mg' })
                  .task('fork', {
-                     'write raw version' : function() {
-                        this.task('write', { name: './build/test.js' })
-                            .run();
+                     'write raw version' : function(done) {
+                        this.task('write', { dest: './build/test.js' })
+                            .run(done);
                      },
-                     'minified version' : function() {
+                     'minified version' : function(done) {
                         this.task('jsminify')
                             .task('inspect')
-                            .task('write', { name: './build/test-min.js' })
-                            .run();
+                            .task('write', { dest: './build/test-min.js' })
+                            .run(done);
                      }
-                 }).run();
+                 }).run(done);
         }          
     })
     .run();
@@ -58,10 +58,10 @@ new Queue('build my skins').task('files', ['./css/test1.css', './css/test2.css']
     .task('csslint')
     .task('fork', {
         'raw css version' : function() {
-            this.task('write', { name: './build/test.css' }).run();
+            this.task('write', { dest: './build/test.css' }).run();
         },
         'minified css version' : function() {
-            this.task('cssminify').task('write', { name: './build/test-min.css' }).run();
+            this.task('cssminify').task('write', { dest: './build/test-min.css' }).run();
         }
     }).run();
 
@@ -70,7 +70,7 @@ new Queue('build my skins').task('files', ['./css/test1.css', './css/test2.css']
  * It can take an array of sources, with globs mixed in.
  */
 new Queue('copy raw css').task('copy', {
-    src : ['css/*'],
+    src : ['css'],
     dest : 'build/copytest',
     excludes : ['js/'],
     recursive : true
