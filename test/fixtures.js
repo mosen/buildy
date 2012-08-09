@@ -11,5 +11,6 @@ var fixtures = module.exports = {
     fileregex          : /test1.js/,
     directory          : path.join(__dirname, 'fixtures', 'dir'),
     directory_relative : path.join('.', 'fixtures', 'dir'),
-    glob               : path.join(__dirname, 'fixtures', 'filelist', 'test*.txt')
+    glob               : path.join(__dirname, 'fixtures', 'filelist', 'test*.txt'),
+    template           : path.join(__dirname, 'fixtures', 'test.handlebars')
 };

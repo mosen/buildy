@@ -177,107 +177,70 @@ Custom tasks
 If you need to add to the available tasks (because a 3rd party tool isn't listed in the built in tasks, for example),
 you can write your own tasks to be loaded before queues are executed.
 
-*WARNING: API Still in development, may change*
+*WARNING: The task API is still in development, and may change until a 1.0 release*
 
-Basic guidelines
-----------------
+Custom task walkthrough
+-----------------------
 
-Take a look at some of the built in tasks (in ./lib/tasks) to see how a custom task should be structured.
+TODO
 
-* Each task has its own source file, but you can publish many tasks in one file if you like. (for instance if there is
-a very small variation between two tasks that use the same 3rd party library).
-* The task file must export a property called `tasks`, which is an object.
-* The `tasks` object contains a property name, which the user supplies when invoking the task, and a function.
-* The task function is called with options, and an event emitter. The queue expects you to emit `complete` or `failed`
-from the emitter, to let it know the result of your asynchronous (or synchronous) task.
-* The state will wrap the string, file or stream input to your task. All you need to know is that state.read() will
-handle the underlying asynchronous I/O for whatever that state may be.
 
-Hello.js - a custom task example
---------------------------------
+The core parts of buildy
+========================
 
-hello.js
+State
+-----
 
-```javascript
-var State = require('buildy/lib/state'); // Required to use State.TYPES.*, see switch statement later...
+The state object is passed between tasks in the chain. It represents the thing(s) you are modifying.
+It acts as a collection and delegates I/O operations for each of its values.
 
-function hello() {
-    return 'hello world';
-}
+The state object acts like a collection which hints at the type of value it is storing. The hinted type is used to
+ determine how to read or write that type of value. One of the clear reasons for this kind of type hinting is that a
+ string's contents can be interpreted in quite a few different ways.
 
-function _hello(params, status, logger) {
-    switch (this._state.get().type) { /* What type of input are we handling? we should handle every pseudo constant in
-                                         State.TYPES.* */
+The naming of the keys in this collection usually corresponds to the source of the item, for example: The full path to
+the filename of the source file, the URI of a stream that can be read, etc. This is not a hard rule (you can use
+any unique string as the key for an item in the collection), but it allows you to trace the source(s) of your build more
+easily.
 
-        case State.TYPES.STRING:
-            var myStringValue = hello(), // Call another function to handle the functionality of the task
-                myStatusMessage = 'Set new value to ' + myStringValue;
+Because the state object acts like a collection, it has inherited a fair amount of the API you would find when dealing
+with collections in various dynamic scripting languages. Examples are `length()`, `forEach()`, `get()`, `set()`. See
+the API docs for more information about dealing with the state as a collection in your custom tasks.
 
-            this._state.set(State.TYPES.STRING, myStringValue); // We set a new value 'hello world' of type string
-            promise.emit('complete', 'hello', myStatusMessage); // Tell the queue we are done successfully
-
-            break;
-
-        case State.TYPES.STRINGS:
-            // Iterate through strings
-            // Set all of them to 'hello world'
-            // Set the new state value from that array
-            break;
-
-        case State.TYPES.FILES:
-            // Behaviour is up to you...
-            break;
-
-        default:
-            promise.emit('failed', 'hello', 'Unrecognized input type: ' + this._state.get().type);
-
-    }
-}
-
-exports.tasks = {
-    'hello' : _hello
-}
-```
-
-This task is now registered as the `hello` task. We can use it now as a part of our build process, like so:
-
-testqueue.js
-
-```javascript
-var Registry = require('buildy/lib/registry'),
-    Queue = require('buildy/lib/queue').Queue,
-    customRegistry, testq;
-
-customRegistry.add('/path/to/tasks/hello.js'); // Add the custom task OR
-// customRegistry.load('/path/to/tasks/directory'); // Load *.js from this directory
-
-testq = new Queue('Testing queue', { registry: customRegistry }); // Set up a new queue with custom registry.
-
-testq.task('hello'); // The current state will be set to 'hello world'
-testq.write({ dest: './hello.txt' }) // The string will be written out to a file, ./hello.txt
-testq.run(); // Run the task chain, the hello.txt file is created.
-```
+The other role of the state object is to delegate I/O for the objects or values that it represents. This presents the
+custom tasks with a single set of methods to deal with various different types of files and streams. Even though this
+part is abstracted, the task may assume that the content type is one that it can work with. The JSLint task for example
+assumes that you won't try to construct a queue that runs a jpeg file through it.
 
 Queue
-=====
+-----
 
-The following options can be supplied as the second parameter, an object containing any of these properties:
+The queue object controls the flow of a single task chain. It moves through the set of tasks you instruct it to, with
+the parameters you supplied. It also collects information about each task's progress; whether it failed, if there was
+some kind of warning, etc.
 
-* `skip : ['task name to skip', ...]` Basic task skipping, allows you to skip a particular task by its task name.
-Execution will continue on the next task in the queue.
-* `defaults : { 'task name' : { ... } }` Object containing task names with their respective default parameters.
+Some special tasks cause the flow to change, like the `fork` task. The `fork` task creates a set of new queue objects
+that inherit the state of the queue that spawned them. In a lot of ways, the fork task acts like a forked process.
 
+The queue fires events related to each stage of execution. You can also supply a callback to the end of the queue which
+will then be executed upon completion (including failure) to do any kind of post-build logic or cleanup.
+
+Registry
+--------
+
+The registry manages a list of available tasks that you can add to a queue. It can load new tasks from a directory or
+specified by single filename. It ensures that task names are unique.
+
+The queue object always refers to an instance of registry to retrieve a task just before it is about to be executed.
+The default task registry is available as a property of your queue object(s) as `queue.registry`.
 
 TODO
 ====
 
 * Convert all test suites to mocha (40%)
-* Update tasks to suit new custom task format (Types of input declared explicitly, queue methods renamed).
-* Update registry to suit new custom task format. Accepted types must be specified which takes a bit of syntax away
-from the task code itself.
+* Update tasks to suit new custom task format.
 * Tasks should have access to logger in this.logger context (Queue object context).
-* Convert asynchronous code of my own to use the `async` module instead (20%).
-* Check the validity of using fs.sendfile() to copy files (*nix and win32) all the way back to node v0.4.x
+* Convert parallel execution of async code to use the `async` module instead of my own homebrew method (20%).
 * Document and design in more detail how custom tasks are loaded or added from your own project.
 * Produce reports in various formats from tasks. Try to seperate reporting (details of build) from logging (events in
 the build process).
