@@ -1,0 +1,13 @@
+{
+    "name" : "buildy",
+    "description" : "An asynchronous build system for NodeJS",
+    "version" : "0.0.8",
+    "url" : "https://github.com/mosen/buildy",
+    "options" : {
+        "outdir" : "./html",
+        "attributesEmit" : "false",
+        "paths" : [
+            "../../lib"
+        ]
+    }
+}
