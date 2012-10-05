@@ -50,4 +50,6 @@ describe('queue:', function() {
             });
         });
     });
+
+    describe('regression when queue contains zero tasks'); // TODO: flesh out test case
 });
