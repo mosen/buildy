@@ -5,7 +5,7 @@ var Queue = buildy.Queue;
 /**
  * Create a YUI module based upon the given uri
  * @param {String} uri
- * @param {Function} cb Callback taking err, data
+ * @param {Function} cb Callback taking err, data (utf8 encoded javascript)
  * @return {String} module content
  */
 exports.module = function(uri, cb) {
@@ -25,9 +25,9 @@ exports.module = function(uri, cb) {
         .task('jslint')
         .task('concat')
         .task('uglify')
-        .task('write', { dest: './build/test.js' })
         .run(function() {
             console.log('output');
+            console.log(this.state);
             cb(null, "this would be the js output");
         });
 };
