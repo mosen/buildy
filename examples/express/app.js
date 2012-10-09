@@ -17,20 +17,19 @@ var util = require('util');
 app.use('/build', function(req, res, next) {
 
     var uri_parts = req.path.split('/');
-    var module_name = uri_parts[0];
-    var module_release = uri_parts[1].split('-')[1];
+
+    var module_name = uri_parts[1];
+    var module_release = uri_parts[2].split('-')[1];
     var source_directory = path.join(__dirname, 'src');
     var module_sources = path.join(source_directory, module_name, 'js', '*');
 
     var buildy = require(path.join(__dirname, '..', '..', 'lib', 'buildy.js'));
     var Queue = buildy.Queue;
 
-    var q = new Queue('build yui module', { logger: console })
+    var q = new Queue('building ' + module_name, { logger: console })
         .task('files', [module_sources]) // all of these synchronous
         .task('jslint')
         .task('concat')
-        .task('uglify')
-        .task('dump');
 
     q.run(function(err, state) {
         util.log('Finished running build queue');
