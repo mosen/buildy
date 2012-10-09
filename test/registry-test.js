@@ -1,18 +1,10 @@
 /*global describe, it*/
 // Mocha test suite
 var Registry = require('../lib/buildy/registry');
-
+var path = require('path');
 var should = require('should');
 
 describe('registry:', function() {
-
-//    describe('when loading a single task "concat"', function() {
-//        it('should contain a tasks object with a "concat" property', function() {
-//            var r = new Registry({ autoload: false });
-//            r.load(__dirname + '/../lib/buildy/tasks/concat.js'); // TODO: stub task
-//            r._tasks.should.have.property('concat');
-//        });
-//    });
 
     describe('when loading a directory containing tasks', function() {
         it('should contain more than zero tasks', function() {
@@ -22,14 +14,11 @@ describe('registry:', function() {
         });
     });
 
-//    describe('when getting a task by name', function() {
-//        it('should return an object with accepted types as properties', function() {
-//            var r = new Registry({ autoload: true });
-//            var concat_task = r.task('concat');
-//            Object.keys(concat_task).forEach(function(acceptedType) {
-//                ['STRING','FILE'].should.include(acceptedType);
-//            });
-//        });
-//    });
+    describe('regression when loading a task that refers to a module that is unavailable', function() {
+        it('should continue with a warning and not throw an exception', function() {
+            var r = new Registry();
+            r.load(path.join(__dirname, 'test', 'fixtures', 'nomodule_task', 'nomodule.js'));
+        });
+    });
 
 });

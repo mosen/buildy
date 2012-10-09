@@ -237,8 +237,6 @@ The default task registry is available as a property of your queue object(s) as 
 TODO
 ====
 
-* Convert all test suites to mocha (40%)
-* Update tasks to suit new custom task format.
 * Tasks should have access to logger in this.logger context (Queue object context).
 * Convert parallel execution of async code to use the `async` module instead of my own homebrew method (20%).
 * Document and design in more detail how custom tasks are loaded or added from your own project.
