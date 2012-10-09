@@ -8,20 +8,41 @@
 
 var express = require('express');
 var app = express();
+var path = require('path');
+var util = require('util');
 
-var buildy_middleware = function(req, res, next) {
+// Mount buildy middleware at /build
+// Module request uri's are expected to follow this pattern:
+// /build/modulename/module[-ext].js Where ext is "", "min" or "debug"
+app.use('/build', function(req, res, next) {
 
-    require('./queues.js').module(req.params[0], function(err, data) {
-        res.send(data);
-        next();
+    var uri_parts = req.path.split('/');
+    var module_name = uri_parts[0];
+    var module_release = uri_parts[1].split('-')[1];
+    var source_directory = path.join(__dirname, 'src');
+    var module_sources = path.join(source_directory, module_name, 'js', '*');
+
+    var buildy = require(path.join(__dirname, '..', '..', 'lib', 'buildy.js'));
+    var Queue = buildy.Queue;
+
+    var q = new Queue('build yui module', { logger: console })
+        .task('files', [module_sources]) // all of these synchronous
+        .task('jslint')
+        .task('concat')
+        .task('uglify')
+        .task('dump');
+
+    q.run(function(err, state) {
+        util.log('Finished running build queue');
+        var output = "";
+        state.forEach(function(key, value) {
+            output += value.string;
+        }, this);
+
+        res.send(output);
     });
 
-};
-
-// Mount the buildy middleware using a route
-app.get('/build/*', [buildy_middleware], function(req, res) {
-   res.send('got your request');
 });
 
 app.listen(3000);
-console.log('Listening on port 3000');
+console.log('Buildy on demand listening on port 3000');

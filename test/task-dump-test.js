@@ -10,17 +10,21 @@ var temp = require('temp');
 var assert = require('assert');
 var util = require('util');
 
-describe('task:files ', function () {
+describe('task:dump ', function() {
 
-    describe('when run with the fixtures directory', function () {
+    describe('when run with a state containing a single string', function() {
 
-        it('should contain three items in the state object', function (done) {
-            var q = new Queue('task:files');
+        it('should not callback with an error', function(done) {
 
-            q.task('files', [fixtures.directory]).run(function () {
-                this.state.length().should.equal(3);
+            var q = new Queue('task:handlebars', {
+                state: new State([{ name: 'string-value', string: 'foobar' }])
+            });
+
+            q.task('dump').run(function(err) {
+                should.not.exist(err);
                 done();
             });
+
         });
     });
 });

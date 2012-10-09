@@ -120,4 +120,12 @@ describe('filelist:', function() {
             });
         });
     });
+
+    describe('when called with a glob that matches no items', function() {
+        it('should not time out trying to find glob matches', function(done) {
+            filelist([path.join(__dirname, 'fixtures', 'dir_empty', '*')], function(err, data) {
+                done(err);
+            });
+        });
+    });
 });
